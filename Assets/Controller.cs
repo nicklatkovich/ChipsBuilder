@@ -27,6 +27,15 @@ public class Controller : MonoBehaviour {
     }
 
     void Update( ) {
+        Vector2 mousePosition = Input.mousePosition;
+        if (Input.GetAxis("Mouse ScrollWheel") > 0) {
+            cameraDistance -= 0.5f;
+        } else if (Input.GetAxis("Mouse ScrollWheel") < 0) {
+            cameraDistance += 0.5f;
+        }
+        if (Input.GetMouseButton(2)) {
+            cameraPosition -= (mousePosition - prevMousePosition) / 512f * cameraDistance;
+        }
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         float distance;
         if (mousePlane.Raycast(ray, out distance)) {
@@ -39,10 +48,6 @@ public class Controller : MonoBehaviour {
         mainCamera.transform.position = cameraCenterPosition - new Vector3(0, 0, cameraDistance);
         mainCamera.transform.rotation = Quaternion.identity;
         mainCamera.transform.RotateAround(cameraCenterPosition, Vector3.right, 80f);
-        Vector2 mousePosition = Input.mousePosition;
-        if (Input.GetMouseButton(2)) {
-            cameraPosition -= (mousePosition - prevMousePosition) / 256f * cameraDistance;
-        }
         prevMousePosition = Input.mousePosition;
     }
 }
