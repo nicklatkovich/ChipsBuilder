@@ -9,10 +9,12 @@ public class Controller : MonoBehaviour {
     uint mapWidth = 10;
     uint mapHeight = 10;
     Plane mousePlane;
-    Camera mainCamera;
-    float cameraDistance;
-    Vector2 cameraPosition;
-    Vector2 prevMousePosition = Vector2.zero;
+    Camera mainCam;
+    Vector3 mousePos3d;
+    Vector2 prevMousePos;
+    bool canDrag = false;
+    bool canRotate = false;
+    Vector3 lastHitPoint = Vector3.zero;
 
     void Start( ) {
         mousePlane = new Plane(Vector3.up, Vector3.zero);
@@ -21,33 +23,66 @@ public class Controller : MonoBehaviour {
         Material realPlaneMaterial = realPlane.GetComponent<Renderer>( ).material;
         realPlaneMaterial.mainTextureScale = new Vector2(mapWidth, mapHeight);
         realPlaneMaterial.mainTextureOffset = new Vector2(0.5f, 0.5f);
-        mainCamera = Camera.main;
-        cameraDistance = Mathf.Max(mapWidth, mapHeight);
-        cameraPosition = realPlane.transform.position;
+        mainCam = Camera.main;
+        float cameraDistance = Mathf.Max(mapWidth, mapHeight);
+        mainCam.transform.position = realPlane.transform.position - new Vector3(0, 0, cameraDistance);
+        mainCam.transform.rotation = Quaternion.identity;
+        mainCam.transform.RotateAround(realPlane.transform.position, Vector3.right, 80f);
     }
 
     void Update( ) {
-        Vector2 mousePosition = Input.mousePosition;
-        if (Input.GetAxis("Mouse ScrollWheel") > 0) {
-            cameraDistance -= 0.5f;
-        } else if (Input.GetAxis("Mouse ScrollWheel") < 0) {
-            cameraDistance += 0.5f;
+        Vector2 mousePos = Input.mousePosition;
+        Ray ray = Camera.main.ScreenPointToRay(mousePos);
+        float mouseScroolWheelAxis = Input.GetAxis("Mouse ScrollWheel");
+        if (Mathf.Abs(mouseScroolWheelAxis) > 0f) {
+            Vector3 mainCamPositionBackup = mainCam.transform.position;
+            mainCam.transform.position += mouseScroolWheelAxis * 2f * ray.direction;
+            if (mainCam.transform.position.y < 1f) {
+                mainCam.transform.position = mainCamPositionBackup;
+            }
         }
-        if (Input.GetMouseButton(2)) {
-            cameraPosition -= (mousePosition - prevMousePosition) / 512f * cameraDistance;
-        }
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         float distance;
         if (mousePlane.Raycast(ray, out distance)) {
             Vector3 hitPoint = ray.GetPoint(distance);
             int x = Mathf.FloorToInt(hitPoint.x);
             int z = Mathf.FloorToInt(hitPoint.z);
-            transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
+            bool mouseOverMap;
+            if (mouseOverMap = x >= 0 && x < mapWidth && z >= 0 && z < mapHeight) {
+                lastHitPoint = hitPoint;
+            }
+            if (Input.GetMouseButtonDown(0) && mouseOverMap) {
+                mousePos3d = ray.GetPoint(distance);
+                mousePos3d.y = 0;
+                canDrag = true;
+            } else if (Input.GetMouseButton(0) && canDrag) {
+                Vector3 mouse3DTranslation = ray.GetPoint(distance);
+                mouse3DTranslation.y = 0;
+                mainCam.transform.position -= (mouse3DTranslation - mousePos3d);
+            } else {
+                canDrag = false;
+                if (Input.GetMouseButtonDown(1) && mouseOverMap) {
+                    canRotate = true;
+                }
+                if (Input.GetMouseButton(1) && canRotate) {
+                    mainCam.transform.RotateAround(lastHitPoint, Vector3.up, mousePos.x - prevMousePos.x);
+                    Vector3 mainCamPositionBackup = mainCam.transform.position;
+                    Quaternion mainCamRotationBackup = mainCam.transform.rotation;
+                    mainCam.transform.RotateAround(
+                        lastHitPoint, Vector3.Cross(Vector3.up, mainCam.transform.rotation * Vector3.up), mousePos.y - prevMousePos.y);
+                    if (mainCam.transform.rotation.eulerAngles.x < 30f || mainCam.transform.position.y < 1f) {
+                        mainCam.transform.position = mainCamPositionBackup;
+                        mainCam.transform.rotation = mainCamRotationBackup;
+                    }
+                    //mainCam.transform.RotateAround(hitPoint, new Vector3(
+                    //    mousePos.y - prevMousePos.y,
+                    //    mousePos.x - prevMousePos.x,
+                    //    0f), (mousePos - prevMousePos).sqrMagnitude);
+                } else {
+                    canRotate = false;
+                    transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
+                }
+            }
         }
-        Vector3 cameraCenterPosition = new Vector3(cameraPosition.x, 0, cameraPosition.y);
-        mainCamera.transform.position = cameraCenterPosition - new Vector3(0, 0, cameraDistance);
-        mainCamera.transform.rotation = Quaternion.identity;
-        mainCamera.transform.RotateAround(cameraCenterPosition, Vector3.right, 80f);
-        prevMousePosition = Input.mousePosition;
+        prevMousePos = mousePos;
     }
 }
