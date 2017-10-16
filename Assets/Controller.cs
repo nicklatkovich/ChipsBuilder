@@ -6,6 +6,12 @@ public class Controller : MonoBehaviour {
 
     public GameObject realPlane;
 
+    enum State {
+        Camera,
+        Block,
+    }
+
+    State state = State.Camera;
     uint mapWidth = 10;
     uint mapHeight = 10;
     Plane mousePlane;
@@ -67,19 +73,18 @@ public class Controller : MonoBehaviour {
                     mainCam.transform.RotateAround(lastHitPoint, Vector3.up, mousePos.x - prevMousePos.x);
                     Vector3 mainCamPositionBackup = mainCam.transform.position;
                     Quaternion mainCamRotationBackup = mainCam.transform.rotation;
-                    mainCam.transform.RotateAround(
-                        lastHitPoint, Vector3.Cross(Vector3.up, mainCam.transform.rotation * Vector3.up), mousePos.y - prevMousePos.y);
+                    mainCam.transform.RotateAround(lastHitPoint,
+                        Vector3.Cross(Vector3.up, mainCam.transform.rotation * Vector3.up), prevMousePos.y - mousePos.y);
                     if (mainCam.transform.rotation.eulerAngles.x < 30f || mainCam.transform.position.y < 1f) {
+                        // TODO: bring camera close to the border
                         mainCam.transform.position = mainCamPositionBackup;
                         mainCam.transform.rotation = mainCamRotationBackup;
                     }
-                    //mainCam.transform.RotateAround(hitPoint, new Vector3(
-                    //    mousePos.y - prevMousePos.y,
-                    //    mousePos.x - prevMousePos.x,
-                    //    0f), (mousePos - prevMousePos).sqrMagnitude);
                 } else {
                     canRotate = false;
-                    transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
+                    // TODO: ghost block control
+                    // Like this:
+                    //transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
                 }
             }
         }
