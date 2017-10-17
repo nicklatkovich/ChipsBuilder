@@ -19,10 +19,13 @@ public class Controller : MonoBehaviour {
     Camera mainCam;
     Vector3 mousePos3d;
     Vector2 prevMousePos;
+    float mLBPressedTime = 0f;
     bool canDrag = false;
     bool canRotate = false;
     Vector3 lastHitPoint = Vector3.zero;
     GameObject standingBlock;
+
+    public const float CLICK_TIME = 0.5f;
 
     void Start( ) {
         mousePlane = new Plane(Vector3.up, Vector3.zero);
@@ -54,14 +57,6 @@ public class Controller : MonoBehaviour {
         }
         Vector2 mousePos = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
-        float mouseScroolWheelAxis = Input.GetAxis("Mouse ScrollWheel");
-        if (Mathf.Abs(mouseScroolWheelAxis) > 0f) {
-            Vector3 mainCamPositionBackup = mainCam.transform.position;
-            mainCam.transform.position += mouseScroolWheelAxis * 2f * ray.direction;
-            if (mainCam.transform.position.y < 1f) {
-                mainCam.transform.position = mainCamPositionBackup;
-            }
-        }
         float distance;
         if (mousePlane.Raycast(ray, out distance)) {
             Vector3 hitPoint = ray.GetPoint(distance);
@@ -69,37 +64,59 @@ public class Controller : MonoBehaviour {
             int z = Mathf.FloorToInt(hitPoint.z);
             bool mouseOverMap;
             if (mouseOverMap = x >= 0 && x < mapWidth && z >= 0 && z < mapHeight) {
-                lastHitPoint = hitPoint;
+                if (state == State.Block) {
+                    standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
+                }
+                float mouseScroolWheelAxis = Input.GetAxis("Mouse ScrollWheel");
+                if (Mathf.Abs(mouseScroolWheelAxis) > 0f) {
+                    Vector3 mainCamPositionBackup = mainCam.transform.position;
+                    mainCam.transform.position += mouseScroolWheelAxis * 2f * ray.direction;
+                    if (mainCam.transform.position.y < 1f) {
+                        mainCam.transform.position = mainCamPositionBackup;
+                    }
+                }
+                if (Input.GetMouseButtonDown(0)) {
+                    canDrag = true;
+                    mLBPressedTime = Time.time;
+                    mousePos3d = ray.GetPoint(distance);
+                    mousePos3d.y = 0;
+                }
+                if (Input.GetMouseButtonUp(0)) {
+                    canDrag = false;
+                    if (state == State.Block && Time.time - mLBPressedTime <= CLICK_TIME) {
+                        state = State.Camera;
+                        foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
+                            // TODO: make function for this
+                            var rendererColor = renderer.material.color;
+                            rendererColor.a = 1f;
+                            renderer.material.color = rendererColor;
+                        }
+                        standingBlock = null;
+                    }
+                }
+                if (Input.GetMouseButtonDown(1)) {
+                    canRotate = true;
+                    lastHitPoint = hitPoint;
+                }
+                if (Input.GetMouseButtonUp(1)) {
+                    canRotate = false;
+                }
             }
-            if (Input.GetMouseButtonDown(0) && mouseOverMap) {
-                mousePos3d = ray.GetPoint(distance);
-                mousePos3d.y = 0;
-                canDrag = true;
-            } else if (Input.GetMouseButton(0) && canDrag) {
+            if (Input.GetMouseButton(0) && canDrag) {
                 Vector3 mouse3DTranslation = ray.GetPoint(distance);
                 mouse3DTranslation.y = 0;
                 mainCam.transform.position -= (mouse3DTranslation - mousePos3d);
-            } else {
-                canDrag = false;
-                if (Input.GetMouseButtonDown(1) && mouseOverMap) {
-                    canRotate = true;
-                }
-                if (Input.GetMouseButton(1) && canRotate) {
-                    mainCam.transform.RotateAround(lastHitPoint, Vector3.up, mousePos.x - prevMousePos.x);
-                    Vector3 mainCamPositionBackup = mainCam.transform.position;
-                    Quaternion mainCamRotationBackup = mainCam.transform.rotation;
-                    mainCam.transform.RotateAround(lastHitPoint,
-                        Vector3.Cross(Vector3.up, mainCam.transform.rotation * Vector3.up), prevMousePos.y - mousePos.y);
-                    if (mainCam.transform.rotation.eulerAngles.x < 30f || mainCam.transform.position.y < 1f) {
-                        // TODO: bring camera close to the border
-                        mainCam.transform.position = mainCamPositionBackup;
-                        mainCam.transform.rotation = mainCamRotationBackup;
-                    }
-                } else {
-                    canRotate = false;
-                    if (state == State.Block) {
-                        standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
-                    }
+            }
+            if (Input.GetMouseButton(1) && canRotate) {
+                mainCam.transform.RotateAround(lastHitPoint, Vector3.up, mousePos.x - prevMousePos.x);
+                Vector3 mainCamPositionBackup = mainCam.transform.position;
+                Quaternion mainCamRotationBackup = mainCam.transform.rotation;
+                mainCam.transform.RotateAround(lastHitPoint,
+                    Vector3.Cross(Vector3.up, mainCam.transform.rotation * Vector3.up), prevMousePos.y - mousePos.y);
+                if (mainCam.transform.rotation.eulerAngles.x < 30f || mainCam.transform.position.y < 1f) {
+                    // TODO: bring camera close to the border
+                    mainCam.transform.position = mainCamPositionBackup;
+                    mainCam.transform.rotation = mainCamRotationBackup;
                 }
             }
         }
