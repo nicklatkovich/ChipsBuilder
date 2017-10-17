@@ -5,6 +5,7 @@ using UnityEngine;
 public class Controller : MonoBehaviour {
 
     public GameObject realPlane;
+    public GameObject andGatePrefab;
 
     enum State {
         Camera,
@@ -21,6 +22,7 @@ public class Controller : MonoBehaviour {
     bool canDrag = false;
     bool canRotate = false;
     Vector3 lastHitPoint = Vector3.zero;
+    GameObject standingBlock;
 
     void Start( ) {
         mousePlane = new Plane(Vector3.up, Vector3.zero);
@@ -37,6 +39,19 @@ public class Controller : MonoBehaviour {
     }
 
     void Update( ) {
+        if (Input.GetKeyDown(KeyCode.A)) {
+            state = State.Block;
+            standingBlock = Instantiate(andGatePrefab);
+            standingBlock.transform.localScale = new Vector3(0.025f, 0.025f, 0.025f);
+            foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
+                var rendererColor = renderer.material.color;
+                rendererColor.a = 0.5f;
+                renderer.material.color = rendererColor;
+            }
+        } else if (Input.GetKeyDown(KeyCode.Escape)) {
+            state = State.Camera;
+            Destroy(standingBlock);
+        }
         Vector2 mousePos = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
         float mouseScroolWheelAxis = Input.GetAxis("Mouse ScrollWheel");
@@ -82,9 +97,9 @@ public class Controller : MonoBehaviour {
                     }
                 } else {
                     canRotate = false;
-                    // TODO: ghost block control
-                    // Like this:
-                    //transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
+                    if (state == State.Block) {
+                        standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
+                    }
                 }
             }
         }
