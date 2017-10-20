@@ -1,15 +1,15 @@
 fileFormatVersion: 2
 guid: 556416b250559284ab8b88c83accc144
-timeCreated: 1508166788
+timeCreated: 1508232359
 licenseType: Free
 ModelImporter:
   serializedVersion: 21
   fileIDToRecycleName:
-    100000: Box001
-    100002: //RootNode
+    100000: //RootNode
+    100002: Box001
     100004: TextPlus001
-    400000: Box001
-    400002: //RootNode
+    400000: //RootNode
+    400002: Box001
     400004: TextPlus001
     2300000: Box001
     2300002: TextPlus001
@@ -68,7 +68,7 @@ ModelImporter:
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
-  importAnimation: 1
+  importAnimation: 0
   copyAvatar: 0
   humanDescription:
     serializedVersion: 2

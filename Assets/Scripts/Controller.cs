@@ -5,7 +5,7 @@ using UnityEngine;
 public class Controller : MonoBehaviour {
 
     public GameObject realPlane;
-    public GameObject andGatePrefab;
+    public AndGate andGatePrefab;
 
     enum State {
         Camera,
@@ -13,8 +13,8 @@ public class Controller : MonoBehaviour {
     }
 
     State state = State.Camera;
-    uint mapWidth = 10;
-    uint mapHeight = 10;
+    uint mapWidth = 50;
+    uint mapHeight = 50;
     Plane mousePlane;
     Camera mainCam;
     Vector3 mousePos3d;
@@ -23,7 +23,9 @@ public class Controller : MonoBehaviour {
     bool canDrag = false;
     bool canRotate = false;
     Vector3 lastHitPoint = Vector3.zero;
-    GameObject standingBlock;
+    Gate standingBlock;
+
+    Gate[ ][ ] gatesMap;
 
     public const float CLICK_TIME = 0.5f;
 
@@ -34,29 +36,35 @@ public class Controller : MonoBehaviour {
         Material realPlaneMaterial = realPlane.GetComponent<Renderer>( ).material;
         realPlaneMaterial.mainTextureScale = new Vector2(mapWidth, mapHeight);
         realPlaneMaterial.mainTextureOffset = new Vector2(0.5f, 0.5f);
+        // TODO: create height-map for realPlane
         mainCam = Camera.main;
         float cameraDistance = Mathf.Max(mapWidth, mapHeight);
         mainCam.transform.position = realPlane.transform.position - new Vector3(0, 0, cameraDistance);
         mainCam.transform.rotation = Quaternion.identity;
         mainCam.transform.RotateAround(realPlane.transform.position, Vector3.right, 80f);
+        gatesMap = Utils.Init2DArray<Gate>(mapWidth, mapHeight);
     }
 
     void Update( ) {
         if (Input.GetKeyDown(KeyCode.A)) {
             state = State.Block;
+            if (standingBlock != null) {
+                Destroy(standingBlock.gameObject);
+            }
             standingBlock = Instantiate(andGatePrefab);
-            standingBlock.transform.localScale = new Vector3(0.025f, 0.025f, 0.025f);
+            //standingBlock.transform.localScale = new Vector3(0.025f, 0.025f, 0.025f);
             foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
                 var rendererColor = renderer.material.color;
-                rendererColor.a = 0.5f;
+                rendererColor.a = 0.2f;
                 renderer.material.color = rendererColor;
             }
         } else if (Input.GetKeyDown(KeyCode.Escape)) {
             state = State.Camera;
-            Destroy(standingBlock);
+            Destroy(standingBlock.gameObject);
         }
         Vector2 mousePos = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
+        bool canStandBlock = false;
         float distance;
         if (mousePlane.Raycast(ray, out distance)) {
             Vector3 hitPoint = ray.GetPoint(distance);
@@ -64,15 +72,25 @@ public class Controller : MonoBehaviour {
             int z = Mathf.FloorToInt(hitPoint.z);
             bool mouseOverMap;
             if (mouseOverMap = x >= 0 && x < mapWidth && z >= 0 && z < mapHeight) {
-                if (state == State.Block) {
-                    standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
-                }
                 float mouseScroolWheelAxis = Input.GetAxis("Mouse ScrollWheel");
                 if (Mathf.Abs(mouseScroolWheelAxis) > 0f) {
                     Vector3 mainCamPositionBackup = mainCam.transform.position;
-                    mainCam.transform.position += mouseScroolWheelAxis * 2f * ray.direction;
-                    if (mainCam.transform.position.y < 1f) {
+                    mainCam.transform.position += mouseScroolWheelAxis * 10f * ray.direction;
+                    if (mainCam.transform.position.y < 3f) {
                         mainCam.transform.position = mainCamPositionBackup;
+                    }
+                }
+                if (state == State.Block) {
+                    if (canStandBlock = mouseOverMap) {
+                        for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
+                            for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
+                                if (gatesMap[i][j] != null) {
+                                    canStandBlock = false;
+                                    i = iTo - 1;
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
                 if (Input.GetMouseButtonDown(0)) {
@@ -83,13 +101,20 @@ public class Controller : MonoBehaviour {
                 }
                 if (Input.GetMouseButtonUp(0)) {
                     canDrag = false;
-                    if (state == State.Block && Time.time - mLBPressedTime <= CLICK_TIME) {
+                    if (state == State.Block && Time.time - mLBPressedTime <= CLICK_TIME && canStandBlock) {
                         state = State.Camera;
                         foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
-                            // TODO: make function for this
+                            // TODO: make function for changing color
                             var rendererColor = renderer.material.color;
                             rendererColor.a = 1f;
                             renderer.material.color = rendererColor;
+                            // TODO: change render mode
+                            //renderer.material.SetFloat("_Mode", 0);
+                        }
+                        for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
+                            for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
+                                gatesMap[i][j] = standingBlock;
+                            }
                         }
                         standingBlock = null;
                     }
@@ -106,6 +131,18 @@ public class Controller : MonoBehaviour {
                 Vector3 mouse3DTranslation = ray.GetPoint(distance);
                 mouse3DTranslation.y = 0;
                 mainCam.transform.position -= (mouse3DTranslation - mousePos3d);
+            } else {
+                if (canStandBlock) {
+                    standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
+                    foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
+                        renderer.material.color = new Color(1f, 1f, 1f, 0.5f);
+                    }
+                } else {
+                    standingBlock.transform.position = new Vector3(hitPoint.x, 0, hitPoint.z);
+                    foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
+                        renderer.material.color = new Color(1f, 0f, 0f, 0.5f);
+                    }
+                }
             }
             if (Input.GetMouseButton(1) && canRotate) {
                 mainCam.transform.RotateAround(lastHitPoint, Vector3.up, mousePos.x - prevMousePos.x);
@@ -113,7 +150,7 @@ public class Controller : MonoBehaviour {
                 Quaternion mainCamRotationBackup = mainCam.transform.rotation;
                 mainCam.transform.RotateAround(lastHitPoint,
                     Vector3.Cross(Vector3.up, mainCam.transform.rotation * Vector3.up), prevMousePos.y - mousePos.y);
-                if (mainCam.transform.rotation.eulerAngles.x < 30f || mainCam.transform.position.y < 1f) {
+                if (mainCam.transform.rotation.eulerAngles.x < 30f || mainCam.transform.position.y < 3f) {
                     // TODO: bring camera close to the border
                     mainCam.transform.position = mainCamPositionBackup;
                     mainCam.transform.rotation = mainCamRotationBackup;
