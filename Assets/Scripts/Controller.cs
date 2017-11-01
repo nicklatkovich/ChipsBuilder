@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Controller : MonoBehaviour {
 
@@ -26,6 +24,7 @@ public class Controller : MonoBehaviour {
     Gate standingBlock;
 
     Gate[ ][ ] gatesMap;
+    bool[ ][ ] collisionMap;
 
     public const float CLICK_TIME = 0.5f;
 
@@ -42,7 +41,8 @@ public class Controller : MonoBehaviour {
         mainCam.transform.position = realPlane.transform.position - new Vector3(0, 0, cameraDistance);
         mainCam.transform.rotation = Quaternion.identity;
         mainCam.transform.RotateAround(realPlane.transform.position, Vector3.right, 80f);
-        gatesMap = Utils.Init2DArray<Gate>(mapWidth, mapHeight);
+        gatesMap = Utils.Init2DArray<Gate>(mapWidth, mapHeight, null);
+        collisionMap = Utils.Init2DArray(mapWidth, mapHeight, false);
     }
 
     void Update( ) {
@@ -80,15 +80,13 @@ public class Controller : MonoBehaviour {
                         mainCam.transform.position = mainCamPositionBackup;
                     }
                 }
-                if (state == State.Block) {
-                    if (canStandBlock = mouseOverMap) {
-                        for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
-                            for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
-                                if (gatesMap[i][j] != null) {
-                                    canStandBlock = false;
-                                    i = iTo - 1;
-                                    break;
-                                }
+                if (state == State.Block && (canStandBlock = mouseOverMap)) {
+                    for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
+                        for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
+                            if (collisionMap[i][j]) {
+                                canStandBlock = false;
+                                i = iTo - 1;
+                                break;
                             }
                         }
                     }
@@ -114,7 +112,12 @@ public class Controller : MonoBehaviour {
                         for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
                             for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
                                 gatesMap[i][j] = standingBlock;
+                                collisionMap[i][j] = true;
                             }
+                            collisionMap[i][z - 3] = collisionMap[i][z + 3] = true;
+                        }
+                        for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
+                            collisionMap[x - 3][j] = collisionMap[x + 3][j] = true;
                         }
                         standingBlock = null;
                     }
@@ -131,14 +134,30 @@ public class Controller : MonoBehaviour {
                 Vector3 mouse3DTranslation = ray.GetPoint(distance);
                 mouse3DTranslation.y = 0;
                 mainCam.transform.position -= (mouse3DTranslation - mousePos3d);
-            } else {
+            } else if (state == State.Block) {
                 if (canStandBlock) {
                     standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
                     foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
-                        renderer.material.color = new Color(1f, 1f, 1f, 0.5f);
+                        bool colorIsSetted = false;
+                        Color color = default(Color);
+                        switch (renderer.material.name) {
+                            case "BlockMaterial":
+                            case "BlockMaterial (Instance)":
+                                color = new Color(0f, 0f, 0.8f, 0.5f);
+                                colorIsSetted = true;
+                                break;
+                            case "TextMaterial":
+                            case "TextMaterial (Instance)":
+                                color = new Color(0.8f, 0f, 0f, 0.5f);
+                                colorIsSetted = true;
+                                break;
+                        }
+                        if (colorIsSetted) {
+                            renderer.material.color = color;
+                        }
                     }
                 } else {
-                    standingBlock.transform.position = new Vector3(hitPoint.x, 0, hitPoint.z);
+                    standingBlock.transform.position = new Vector3(hitPoint.x, 0.6f, hitPoint.z);
                     foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
                         renderer.material.color = new Color(1f, 0f, 0f, 0.5f);
                     }
