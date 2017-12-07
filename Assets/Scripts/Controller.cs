@@ -2,6 +2,13 @@
 
 public class Controller : MonoBehaviour {
 
+    private static Controller _current;
+    public static Controller Current {
+        get {
+            return _current;
+        }
+    }
+
     public GameObject realPlane;
     public AndGate andGatePrefab;
     public Node nodePrefab;
@@ -24,12 +31,14 @@ public class Controller : MonoBehaviour {
     Vector3 lastHitPoint = Vector3.zero;
     Gate standingBlock;
 
+    Node[ ][ ] nodesMap;
     Gate[ ][ ] gatesMap;
     bool[ ][ ] collisionMap;
 
     public const float CLICK_TIME = 0.5f;
 
     void Start( ) {
+        _current = this;
         mousePlane = new Plane(Vector3.up, Vector3.zero);
         realPlane.transform.position = new Vector3(mapWidth / 2f, 0f, mapHeight / 2f);
         realPlane.transform.localScale = new Vector3(mapWidth / 10f, 1f, mapHeight / 10f);

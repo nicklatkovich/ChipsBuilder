@@ -4,8 +4,6 @@ using UnityEngine;
 
 public abstract class Gate : MonoBehaviour {
 
-    public GameObject NodePrefab;
-
     public abstract uint GetWidth( );
     public abstract uint GetHeight( );
     public abstract uint GetNodesInCount( );
@@ -26,12 +24,15 @@ public abstract class Gate : MonoBehaviour {
 
     public void Start( ) {
         foreach (Vector3 nodePosition in GetNodesIn( )) {
-            Instantiate(
-                NodePrefab, nodePosition, Quaternion.identity, this.transform);
+            Node node = Instantiate(Controller.Current.nodePrefab, nodePosition, Quaternion.identity, this.transform);
+            node.isIn = true;
+            node.gate = this;
+
         }
         foreach (Vector3 nodePosition in GetNodesOut( )) {
-            Instantiate(
-                NodePrefab, nodePosition, Quaternion.identity, this.transform);
+            Node node = Instantiate(Controller.Current.nodePrefab, nodePosition, Quaternion.identity, this.transform);
+            node.isIn = false;
+            node.gate = this;
         }
     }
 
