@@ -31,7 +31,7 @@ public class Controller : MonoBehaviour {
     Vector3 lastHitPoint = Vector3.zero;
     Gate standingBlock;
 
-    Node[ ][ ] nodesMap;
+    public Node[ ][ ] nodesMap;
     Gate[ ][ ] gatesMap;
     bool[ ][ ] collisionMap;
 
@@ -52,6 +52,7 @@ public class Controller : MonoBehaviour {
         mainCam.transform.rotation = Quaternion.identity;
         mainCam.transform.RotateAround(realPlane.transform.position, Vector3.right, 80f);
         gatesMap = Utils.Init2DArray<Gate>(mapWidth, mapHeight, null);
+        nodesMap = Utils.Init2DArray<Node>(mapWidth, mapHeight, null);
         collisionMap = Utils.Init2DArray(mapWidth, mapHeight, false);
     }
 
@@ -129,7 +130,7 @@ public class Controller : MonoBehaviour {
                         for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
                             collisionMap[x - 3][j] = collisionMap[x + 3][j] = true;
                         }
-                        
+                        standingBlock.Place( );
                         standingBlock = null;
                     }
                 }

@@ -9,7 +9,10 @@ public abstract class Gate : MonoBehaviour {
     public abstract uint GetNodesInCount( );
     public abstract uint GetNodesOutCount( );
 
-    public Vector3[ ] GetNodesIn( ) {
+    List<Node> NodesIn = new List<Node>( );
+    List<Node> NodesOut = new List<Node>( );
+
+    public Vector3[ ] GetNodesInPosition( ) {
         return new Vector3[ ] {
             transform.position + new Vector3(-2, 1, -1),
             transform.position + new Vector3(-2, 1,  1)
@@ -23,7 +26,7 @@ public abstract class Gate : MonoBehaviour {
         get { return Main.nodePrefab; }
     }
 
-    public Vector3[ ] GetNodesOut( ) {
+    public Vector3[ ] GetNodesOutPosition( ) {
         return new Vector3[ ] {
             transform.position + new Vector3(2, 1, 0),
         };
@@ -34,13 +37,25 @@ public abstract class Gate : MonoBehaviour {
             Node node = Instantiate(NodePrefab, nodePosition, Quaternion.identity, this.transform);
             node.isIn = isIn;
             node.gate = this;
+            (isIn ? NodesIn : NodesOut).Add(node);
         }
     }
 
     public void Start( ) {
-        createNodes(GetNodesIn( ), true);
-        createNodes(GetNodesOut( ), false);
+        createNodes(GetNodesInPosition( ), true);
+        createNodes(GetNodesOutPosition( ), false);
     }
 
     protected abstract bool[ ] Work(bool[ ] inputs);
+
+    private void placeNodes(ICollection<Node> nodes) {
+        foreach (Node node in nodes) {
+            Main.nodesMap.Set(node.transform.position.ToVector2XZ( ), node);
+        }
+    }
+
+    public virtual void Place( ) {
+        placeNodes(NodesIn);
+        placeNodes(NodesOut);
+    }
 }
