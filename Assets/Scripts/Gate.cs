@@ -16,24 +16,30 @@ public abstract class Gate : MonoBehaviour {
         };
     }
 
+    public static Controller Main {
+        get { return Controller.Current; }
+    }
+    public static Node NodePrefab {
+        get { return Main.nodePrefab; }
+    }
+
     public Vector3[ ] GetNodesOut( ) {
         return new Vector3[ ] {
             transform.position + new Vector3(2, 1, 0),
         };
     }
 
-    public void Start( ) {
-        foreach (Vector3 nodePosition in GetNodesIn( )) {
-            Node node = Instantiate(Controller.Current.nodePrefab, nodePosition, Quaternion.identity, this.transform);
-            node.isIn = true;
+    private void createNodes(Vector3[ ] nodesPosition, bool isIn) {
+        foreach (Vector3 nodePosition in nodesPosition) {
+            Node node = Instantiate(NodePrefab, nodePosition, Quaternion.identity, this.transform);
+            node.isIn = isIn;
             node.gate = this;
+        }
+    }
 
-        }
-        foreach (Vector3 nodePosition in GetNodesOut( )) {
-            Node node = Instantiate(Controller.Current.nodePrefab, nodePosition, Quaternion.identity, this.transform);
-            node.isIn = false;
-            node.gate = this;
-        }
+    public void Start( ) {
+        createNodes(GetNodesIn( ), true);
+        createNodes(GetNodesOut( ), false);
     }
 
     protected abstract bool[ ] Work(bool[ ] inputs);
