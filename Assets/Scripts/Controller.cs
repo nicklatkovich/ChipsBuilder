@@ -4,6 +4,7 @@ public class Controller : MonoBehaviour {
 
     public GameObject realPlane;
     public AndGate andGatePrefab;
+    public Node nodePrefab;
 
     enum State {
         Camera,
@@ -119,6 +120,7 @@ public class Controller : MonoBehaviour {
                         for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
                             collisionMap[x - 3][j] = collisionMap[x + 3][j] = true;
                         }
+                        
                         standingBlock = null;
                     }
                 }
