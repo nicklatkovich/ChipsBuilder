@@ -18,8 +18,18 @@ public abstract class Gate : MonoBehaviour {
         };
     }
 
+    public Vector3[ ] GetNodesOut( ) {
+        return new Vector3[ ] {
+            transform.position + new Vector3(2, 1, 0),
+        };
+    }
+
     public void Start( ) {
         foreach (Vector3 nodePosition in GetNodesIn( )) {
+            Instantiate(
+                NodePrefab, nodePosition, Quaternion.identity, this.transform);
+        }
+        foreach (Vector3 nodePosition in GetNodesOut( )) {
             Instantiate(
                 NodePrefab, nodePosition, Quaternion.identity, this.transform);
         }
