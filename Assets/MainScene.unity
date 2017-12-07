@@ -138,6 +138,8 @@ MonoBehaviour:
   realPlane: {fileID: 1146592307}
   andGatePrefab: {fileID: 114362295226579624, guid: 25aef392c03f4524db6087fb8b97bb95,
     type: 2}
+  nodePrefab: {fileID: 114610255297320578, guid: 37917c6aef2f7264eba10ecfc791ecba,
+    type: 2}
 --- !u!4 &552572412
 Transform:
   m_ObjectHideFlags: 0

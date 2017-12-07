@@ -3,10 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AndGate : Gate {
+    #region implemented abstract members of Gate
+
+    public override uint GetNodesInCount( ) {
+        return 2;
+    }
+
+    public override uint GetNodesOutCount( ) {
+        return 1;
+    }
+
+    #endregion
 
     // Use this for initialization
     void Start( ) {
-
+        base.Start( );
     }
 
     // Update is called once per frame
