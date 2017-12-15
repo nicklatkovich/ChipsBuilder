@@ -50,7 +50,7 @@ public abstract class Gate : MonoBehaviour {
 
     private void placeNodes(ICollection<Node> nodes) {
         foreach (Node node in nodes) {
-            Main.nodesMap.Set(node.transform.position.ToVector2XZ( ), node);
+            Main.nodesMap.Set(node.transform.position.ToVector2XZ( ).Add(-0.5f), node);
         }
     }
 

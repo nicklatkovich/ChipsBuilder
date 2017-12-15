@@ -12,10 +12,12 @@ public class Controller : MonoBehaviour {
     public GameObject realPlane;
     public AndGate andGatePrefab;
     public Node nodePrefab;
+    public Net netPrefab;
 
     enum State {
         Camera,
         Block,
+        Net,
     }
 
     State state = State.Camera;
@@ -30,6 +32,8 @@ public class Controller : MonoBehaviour {
     bool canRotate = false;
     Vector3 lastHitPoint = Vector3.zero;
     Gate standingBlock;
+    Net standingNet;
+    Node previousUnderNode = null;
 
     public Node[ ][ ] nodesMap;
     Gate[ ][ ] gatesMap;
@@ -83,6 +87,19 @@ public class Controller : MonoBehaviour {
             int z = Mathf.FloorToInt(hitPoint.z);
             bool mouseOverMap;
             if (mouseOverMap = x >= 0 && x < mapWidth && z >= 0 && z < mapHeight) {
+                if (previousUnderNode != null) {
+                    foreach (var renderer in previousUnderNode.GetComponentsInChildren<Renderer>( )) {
+                        renderer.material.color = Color.gray;
+                    }
+                    previousUnderNode = null;
+                }
+                Node underNode = nodesMap[x][z];
+                if (underNode != null) {
+                    foreach (var renderer in underNode.GetComponentsInChildren<Renderer>( )) {
+                        renderer.material.color = Color.green;
+                        previousUnderNode = underNode;
+                    }
+                }
                 float mouseScroolWheelAxis = Input.GetAxis("Mouse ScrollWheel");
                 if (Mathf.Abs(mouseScroolWheelAxis) > 0f) {
                     Vector3 mainCamPositionBackup = mainCam.transform.position;
@@ -103,10 +120,23 @@ public class Controller : MonoBehaviour {
                     }
                 }
                 if (Input.GetMouseButtonDown(0)) {
-                    canDrag = true;
-                    mLBPressedTime = Time.time;
-                    mousePos3d = ray.GetPoint(distance);
-                    mousePos3d.y = 0;
+                    if (nodesMap[x][z] == null) {
+                        canDrag = true;
+                        mLBPressedTime = Time.time;
+                        mousePos3d = ray.GetPoint(distance);
+                        mousePos3d.y = 0;
+                    } else {
+                        if (standingNet == null) {
+                            standingNet = Instantiate(netPrefab);
+                            state = State.Net;
+                            standingNet.from = nodesMap[x][z].transform.position.ToVector2XZ( );
+                        }
+                        else {
+                            standingNet.to = new Vector2(x, z).Add(0.5f);
+                            standingNet = null;
+                            state = State.Camera;
+                        }
+                    }
                 }
                 if (Input.GetMouseButtonUp(0)) {
                     canDrag = false;
@@ -146,7 +176,8 @@ public class Controller : MonoBehaviour {
                 Vector3 mouse3DTranslation = ray.GetPoint(distance);
                 mouse3DTranslation.y = 0;
                 mainCam.transform.position -= (mouse3DTranslation - mousePos3d);
-            } else if (state == State.Block) {
+            }
+            else if (state == State.Block) {
                 if (canStandBlock) {
                     standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
                     foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
@@ -168,12 +199,18 @@ public class Controller : MonoBehaviour {
                             renderer.material.color = color;
                         }
                     }
-                } else {
+                }
+                else {
                     standingBlock.transform.position = new Vector3(hitPoint.x, 0.6f, hitPoint.z);
                     foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
-                        renderer.material.color = new Color(1f, 0f, 0f, 0.5f);
+                        if (!renderer.material.name.Contains("NodeMaterial")) {
+                            renderer.material.color = new Color(1f, 0f, 0f, 0.5f);
+                        }
                     }
                 }
+            }
+            else if (state == State.Net) {
+                standingNet.to = hitPoint.ToVector2XZ( );
             }
             if (Input.GetMouseButton(1) && canRotate) {
                 mainCam.transform.RotateAround(lastHitPoint, Vector3.up, mousePos.x - prevMousePos.x);

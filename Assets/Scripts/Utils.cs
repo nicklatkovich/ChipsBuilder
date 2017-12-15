@@ -34,4 +34,24 @@ public static class Utils {
         return array.Set(position.Round( ), value);
     }
 
+    public static Vector2 Add(this Vector2 v, float value) {
+        return new Vector2(v.x + value, v.y + value);
+    }
+
+    public static Vector3 Add(this Vector3 v, float value) {
+        return new Vector3(v.x + value, v.y + value, v.z + value);
+    }
+
+    public static float GetAtan2(this Vector2 v) {
+        return Mathf.Atan2(v.y, v.x);
+    }
+
+    public static Vector3 ToVector3XZ(this Vector2 v, float y = 0) {
+        return new Vector3(v.x, y, v.y);
+    }
+
+    public static float GetAtan2Deg(this Vector2 v) {
+        return v.GetAtan2( ) * Mathf.Rad2Deg;
+    }
+
 }
