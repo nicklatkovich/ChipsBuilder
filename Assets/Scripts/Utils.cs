@@ -16,6 +16,12 @@ public static class Utils {
         return result;
     }
 
+    public static List<T> Concat<T>(List<T> enum1, List<T> enum2) {
+        List<T> res = new List<T>(enum1);
+        res.AddRange(enum2);
+        return res;
+    }
+
     public static Vector2 ToVector2XZ(this Vector3 v) {
         return new Vector2(v.x, v.z);
     }

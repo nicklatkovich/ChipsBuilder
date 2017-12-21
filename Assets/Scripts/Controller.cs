@@ -232,8 +232,13 @@ public class Controller : MonoBehaviour {
                 nodesMap[i][j] = null;
             }
         }
-        foreach (var node in selectedBlock.NodesIn) {
-            //foreach (var a  in node.
+        foreach (var node in Utils.Concat(selectedBlock.NodesIn, selectedBlock.NodesOut)) {
+            foreach (var net in node.nets) {
+                Node otherNode = net.from == node ? net.to : net.from;
+                otherNode.nets.Remove(net);
+                Destroy(net.gameObject);
+            }
+            node.nets.Clear();
         }
         Destroy(selectedBlock.gameObject);
     }

@@ -4,8 +4,22 @@ using UnityEngine;
 
 public class Net : MonoBehaviour {
 
-    public Node from;
-    public Node to;
+    private Node _from;
+    public Node from {
+        get { return _from; }
+        set {
+            _from = value; 
+            value.nets.Add(this);
+        }
+    }
+    private Node _to;
+    public Node to {
+        get { return _to; }
+        set {
+            _to = value;
+            value.nets.Add(this);
+        }
+    }
     public Vector2 abstractTo;
     public bool Done = false;
 
