@@ -1,22 +1,24 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class Controller : MonoBehaviour {
 
     private static Controller _current;
+
     public static Controller Current {
-        get {
-            return _current;
-        }
+        get { return _current; }
     }
 
     public GameObject realPlane;
     public AndGate andGatePrefab;
     public Node nodePrefab;
     public Net netPrefab;
+    public CanvasRenderer selectPanel;
 
     enum State {
         Camera,
-        Block,
+        BlockStand,
+        BlockSelect,
         Net,
     }
 
@@ -30,9 +32,13 @@ public class Controller : MonoBehaviour {
     bool canDrag = false;
     bool canRotate = false;
     Vector3 lastHitPoint = Vector3.zero;
+    Node previousUnderNode = null;
+    float mLBPressedTime = 0f;
+
     Gate standingBlock;
     Net standingNet;
-    Node previousUnderNode = null;
+
+    Gate selectedBlock;
 
     public Node[ ][ ] nodesMap;
     Gate[ ][ ] gatesMap;
@@ -61,14 +67,14 @@ public class Controller : MonoBehaviour {
 
     void Update( ) {
         if (Input.GetKeyDown(KeyCode.A)) {
-            state = State.Block;
-            if (standingBlock != null) {
-                Destroy(standingBlock.gameObject);
+            if (state == State.Camera) {
+                state = State.BlockStand;
+                standingBlock = Instantiate(andGatePrefab);
+                //standingBlock.transform.localScale = new Vector3(0.025f, 0.025f, 0.025f);
+                standingBlock.ChangeAlpha(0.2f);
             }
-            standingBlock = Instantiate(andGatePrefab);
-            //standingBlock.transform.localScale = new Vector3(0.025f, 0.025f, 0.025f);
-            standingBlock.ChangeAlpha(0.2f);
-        } else if (Input.GetKeyDown(KeyCode.Escape)) {
+        }
+        else if (Input.GetKeyDown(KeyCode.Escape)) {
             state = State.Camera;
             Destroy(standingBlock.gameObject);
         }
@@ -99,7 +105,7 @@ public class Controller : MonoBehaviour {
                         mainCam.transform.position = mainCamPositionBackup;
                     }
                 }
-                if (state == State.Block && (canStandBlock = mouseOverMap)) {
+                if (state == State.BlockStand && (canStandBlock = mouseOverMap)) {
                     for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
                         for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
                             if (collisionMap[i][j]) {
@@ -116,38 +122,56 @@ public class Controller : MonoBehaviour {
                     mousePos3d.y = 0;
                 }
                 if (Input.GetMouseButtonDown(0)) {
-                    if (nodesMap[x][z] != null) {
-                        if (standingNet == null) {
-                            standingNet = Instantiate(netPrefab);
-                            state = State.Net;
-                            standingNet.from = nodesMap[x][z].transform.position.ToVector2XZ( );
-                        }
-                        else {
-                            standingNet.to = new Vector2(x, z).Add(0.5f);
-                            standingNet = null;
-                            state = State.Camera;
-                        }
-                    }
+                    mLBPressedTime = Time.time;
                 }
                 if (Input.GetMouseButtonUp(2)) {
                     canDrag = false;
                 }
                 if (Input.GetMouseButtonUp(0)) {
-                    if (state == State.Block && canStandBlock) {
-                        state = State.Camera;
-                        standingBlock.ChangeAlpha(1f);
-                        for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
-                            for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
-                                gatesMap[i][j] = standingBlock;
-                                collisionMap[i][j] = true;
+                    if (state == State.BlockStand) {
+                        if (canStandBlock) {
+                            state = State.Camera;
+                            standingBlock.ChangeAlpha(1f);
+                            for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
+                                for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
+                                    gatesMap[i][j] = standingBlock;
+                                    collisionMap[i][j] = true;
+                                }
+                                //collisionMap[i][z - 3] = collisionMap[i][z + 3] = true;
                             }
-                            collisionMap[i][z - 3] = collisionMap[i][z + 3] = true;
+                            //for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
+                            //    collisionMap[x - 3][j] = collisionMap[x + 3][j] = true;
+                            //}
+                            standingBlock.Place( );
+                            standingBlock = null;
                         }
-                        for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
-                            collisionMap[x - 3][j] = collisionMap[x + 3][j] = true;
+                    }
+                    else if (Time.time - mLBPressedTime <= CLICK_TIME) {
+                        if (state == State.Camera) {
+                            if (nodesMap[x][z] != null) {
+                                standingNet = Instantiate(netPrefab);
+                                state = State.Net;
+                                standingNet.from = nodesMap[x][z];
+                            }
+                            else if (gatesMap[x][z] != null) {
+                                state = State.BlockSelect;
+                                selectedBlock = gatesMap[x][z];
+                                selectPanel.transform.localScale = new Vector3(1, 1, 1);
+                            }
                         }
-                        standingBlock.Place( );
-                        standingBlock = null;
+                        else if (state == State.BlockSelect) {
+                            selectedBlock = null;
+                            state = State.Camera;
+                            selectPanel.transform.localScale = Vector3.zero;
+                        }
+                        else if (state == State.Net) {
+                            if (nodesMap[x][z] != null) {
+                                standingNet.to = nodesMap[x][z];
+                                standingNet.Done = true;
+                                standingNet = null;
+                                state = State.Camera;
+                            }
+                        }
                     }
                 }
                 if (Input.GetMouseButtonDown(1)) {
@@ -163,7 +187,7 @@ public class Controller : MonoBehaviour {
                 mouse3DTranslation.y = 0;
                 mainCam.transform.position -= (mouse3DTranslation - mousePos3d);
             }
-            else if (state == State.Block) {
+            else if (state == State.BlockStand) {
                 if (canStandBlock) {
                     standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
                     standingBlock.ChangeColor("^BlockMaterial*", new Color(0f, 0f, 0.8f, 0.5f));
@@ -177,7 +201,7 @@ public class Controller : MonoBehaviour {
                 }
             }
             else if (state == State.Net) {
-                standingNet.to = hitPoint.ToVector2XZ( );
+                standingNet.abstractTo = hitPoint.ToVector2XZ( );
             }
             if (Input.GetMouseButton(1) && canRotate) {
                 mainCam.transform.RotateAround(lastHitPoint, Vector3.up, mousePos.x - prevMousePos.x);
@@ -193,5 +217,24 @@ public class Controller : MonoBehaviour {
             }
         }
         prevMousePos = mousePos;
+    }
+
+    public void RemoveSelectedBlock( ) {
+        if (selectedBlock == null) {
+            return;
+        }
+        int x = Mathf.RoundToInt(selectedBlock.transform.position.x - 0.5f);
+        int z = Mathf.RoundToInt(selectedBlock.transform.position.z - 0.5f);
+        for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
+            for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
+                gatesMap[i][j] = null;
+                collisionMap[i][j] = false;
+                nodesMap[i][j] = null;
+            }
+        }
+        foreach (var node in selectedBlock.NodesIn) {
+            //foreach (var a  in node.
+        }
+        Destroy(selectedBlock.gameObject);
     }
 }

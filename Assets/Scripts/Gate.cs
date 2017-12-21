@@ -9,8 +9,8 @@ public abstract class Gate : MonoBehaviour {
     public abstract uint GetNodesInCount( );
     public abstract uint GetNodesOutCount( );
 
-    List<Node> NodesIn = new List<Node>( );
-    List<Node> NodesOut = new List<Node>( );
+    public List<Node> NodesIn = new List<Node>( );
+    public List<Node> NodesOut = new List<Node>( );
 
     public Vector3[ ] GetNodesInPosition( ) {
         return new Vector3[ ] {

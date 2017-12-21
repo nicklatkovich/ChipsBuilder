@@ -4,16 +4,20 @@ using UnityEngine;
 
 public class Net : MonoBehaviour {
 
-    public Vector2 from;
-    public Vector2 to;
+    public Node from;
+    public Node to;
+    public Vector2 abstractTo;
+    public bool Done = false;
 
     void Start( ) {
 
     }
 
     void Update( ) {
-        transform.localScale = new Vector3((from - to).magnitude, 1, 1);
-        transform.position = ((from + to) / 2f).ToVector3XZ(1f);
-        transform.localRotation = Quaternion.Euler(0, -(to - from).GetAtan2Deg( ), 0);
+        Vector2 f = from.transform.position.ToVector2XZ();
+        Vector2 t = Done ? to.transform.position.ToVector2XZ() : abstractTo;
+        transform.localScale = new Vector3((f - t).magnitude, 1, 1);
+        transform.position = ((f + t) / 2f).ToVector3XZ(1f);
+        transform.localRotation = Quaternion.Euler(0, -(t - f).GetAtan2Deg( ), 0);
     }
 }
