@@ -27,7 +27,6 @@ public class Controller : MonoBehaviour {
     Camera mainCam;
     Vector3 mousePos3d;
     Vector2 prevMousePos;
-    float mLBPressedTime = 0f;
     bool canDrag = false;
     bool canRotate = false;
     Vector3 lastHitPoint = Vector3.zero;
@@ -111,13 +110,13 @@ public class Controller : MonoBehaviour {
                         }
                     }
                 }
+                if (Input.GetMouseButtonDown(2)) {
+                    canDrag = true;
+                    mousePos3d = ray.GetPoint(distance);
+                    mousePos3d.y = 0;
+                }
                 if (Input.GetMouseButtonDown(0)) {
-                    if (nodesMap[x][z] == null) {
-                        canDrag = true;
-                        mLBPressedTime = Time.time;
-                        mousePos3d = ray.GetPoint(distance);
-                        mousePos3d.y = 0;
-                    } else {
+                    if (nodesMap[x][z] != null) {
                         if (standingNet == null) {
                             standingNet = Instantiate(netPrefab);
                             state = State.Net;
@@ -130,9 +129,11 @@ public class Controller : MonoBehaviour {
                         }
                     }
                 }
-                if (Input.GetMouseButtonUp(0)) {
+                if (Input.GetMouseButtonUp(2)) {
                     canDrag = false;
-                    if (state == State.Block && Time.time - mLBPressedTime <= CLICK_TIME && canStandBlock) {
+                }
+                if (Input.GetMouseButtonUp(0)) {
+                    if (state == State.Block && canStandBlock) {
                         state = State.Camera;
                         standingBlock.ChangeAlpha(1f);
                         for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
@@ -157,7 +158,7 @@ public class Controller : MonoBehaviour {
                     canRotate = false;
                 }
             }
-            if (Input.GetMouseButton(0) && canDrag) {
+            if (Input.GetMouseButton(2) && canDrag) {
                 Vector3 mouse3DTranslation = ray.GetPoint(distance);
                 mouse3DTranslation.y = 0;
                 mainCam.transform.position -= (mouse3DTranslation - mousePos3d);
@@ -170,7 +171,9 @@ public class Controller : MonoBehaviour {
                 }
                 else {
                     standingBlock.transform.position = new Vector3(hitPoint.x, 0.6f, hitPoint.z);
-                    standingBlock.ChangeColor("^NodeMaterial", new Color(1f, 0f, 0f, 0.5f));
+                    standingBlock.ChangeColor("^BlockMaterial*", new Color(1f, 0f, 0f, 0.5f));
+                    standingBlock.ChangeColor("^TextMaterial*", new Color(1f, 0f, 0f, 0.5f));
+                    //standingBlock.ChangeColor("^NodeMaterial", new Color(1f, 0f, 0f, 0.5f));
                 }
             }
             else if (state == State.Net) {
