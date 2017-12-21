@@ -75,8 +75,28 @@ public class Controller : MonoBehaviour {
             }
         }
         else if (Input.GetKeyDown(KeyCode.Escape)) {
+            switch (state) {
+                case State.Net:
+                    {
+                        standingNet.from.nets.Remove(standingNet);
+                        Destroy(standingNet.gameObject);
+                        standingNet = null;
+                        break;
+                    }
+                case State.BlockStand:
+                    {
+                        Destroy(standingBlock.gameObject);
+                        standingBlock = null;
+                        break;
+                    }
+                case State.BlockSelect:
+                    {
+                        selectedBlock = null;
+                        selectPanel.transform.localScale = Vector3.zero;
+                        break;
+                    }
+            }
             state = State.Camera;
-            Destroy(standingBlock.gameObject);
         }
         Vector2 mousePos = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
