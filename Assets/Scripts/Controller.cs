@@ -68,11 +68,7 @@ public class Controller : MonoBehaviour {
             }
             standingBlock = Instantiate(andGatePrefab);
             //standingBlock.transform.localScale = new Vector3(0.025f, 0.025f, 0.025f);
-            foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
-                var rendererColor = renderer.material.color;
-                rendererColor.a = 0.2f;
-                renderer.material.color = rendererColor;
-            }
+            standingBlock.ChangeAlpha(0.2f);
         } else if (Input.GetKeyDown(KeyCode.Escape)) {
             state = State.Camera;
             Destroy(standingBlock.gameObject);
@@ -88,17 +84,13 @@ public class Controller : MonoBehaviour {
             bool mouseOverMap;
             if (mouseOverMap = x >= 0 && x < mapWidth && z >= 0 && z < mapHeight) {
                 if (previousUnderNode != null) {
-                    foreach (var renderer in previousUnderNode.GetComponentsInChildren<Renderer>( )) {
-                        renderer.material.color = Color.gray;
-                    }
+                    previousUnderNode.ChangeColor(Color.gray);
                     previousUnderNode = null;
                 }
                 Node underNode = nodesMap[x][z];
                 if (underNode != null) {
-                    foreach (var renderer in underNode.GetComponentsInChildren<Renderer>( )) {
-                        renderer.material.color = Color.green;
-                        previousUnderNode = underNode;
-                    }
+                    underNode.ChangeColor(Color.green);
+                    previousUnderNode = underNode;
                 }
                 float mouseScroolWheelAxis = Input.GetAxis("Mouse ScrollWheel");
                 if (Mathf.Abs(mouseScroolWheelAxis) > 0f) {
@@ -142,14 +134,7 @@ public class Controller : MonoBehaviour {
                     canDrag = false;
                     if (state == State.Block && Time.time - mLBPressedTime <= CLICK_TIME && canStandBlock) {
                         state = State.Camera;
-                        foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
-                            // TODO: make function for changing color
-                            var rendererColor = renderer.material.color;
-                            rendererColor.a = 1f;
-                            renderer.material.color = rendererColor;
-                            // TODO: change render mode
-                            //renderer.material.SetFloat("_Mode", 0);
-                        }
+                        standingBlock.ChangeAlpha(1f);
                         for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
                             for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
                                 gatesMap[i][j] = standingBlock;
@@ -180,33 +165,12 @@ public class Controller : MonoBehaviour {
             else if (state == State.Block) {
                 if (canStandBlock) {
                     standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
-                    foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
-                        bool colorIsSetted = false;
-                        Color color = default(Color);
-                        switch (renderer.material.name) {
-                            case "BlockMaterial":
-                            case "BlockMaterial (Instance)":
-                                color = new Color(0f, 0f, 0.8f, 0.5f);
-                                colorIsSetted = true;
-                                break;
-                            case "TextMaterial":
-                            case "TextMaterial (Instance)":
-                                color = new Color(0.8f, 0f, 0f, 0.5f);
-                                colorIsSetted = true;
-                                break;
-                        }
-                        if (colorIsSetted) {
-                            renderer.material.color = color;
-                        }
-                    }
+                    standingBlock.ChangeColor("^BlockMaterial*", new Color(0f, 0f, 0.8f, 0.5f));
+                    standingBlock.ChangeColor("^TextMaterial*", new Color(0.8f, 0f, 0f, 0.5f));
                 }
                 else {
                     standingBlock.transform.position = new Vector3(hitPoint.x, 0.6f, hitPoint.z);
-                    foreach (var renderer in standingBlock.GetComponentsInChildren<Renderer>( )) {
-                        if (!renderer.material.name.Contains("NodeMaterial")) {
-                            renderer.material.color = new Color(1f, 0f, 0f, 0.5f);
-                        }
-                    }
+                    standingBlock.ChangeColor("^NodeMaterial", new Color(1f, 0f, 0f, 0.5f));
                 }
             }
             else if (state == State.Net) {

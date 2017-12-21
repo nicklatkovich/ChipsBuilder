@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 public static class Utils {
 
@@ -54,4 +55,26 @@ public static class Utils {
         return v.GetAtan2( ) * Mathf.Rad2Deg;
     }
 
+    public static void ChangeColor(this MonoBehaviour @object, string regex, Color color) {
+        Regex rgx = new Regex(regex);
+        foreach (var renderer in @object.GetComponentsInChildren<Renderer>( )) {
+            if (rgx.IsMatch(renderer.material.name)) {
+                renderer.material.color = color;
+            }
+        }
+    }
+
+    public static void ChangeColor(this MonoBehaviour @object, Color color) {
+        foreach (var renderer in @object.GetComponentsInChildren<Renderer>( )) {
+            renderer.material.color = color;
+        }
+    }
+
+    public static void ChangeAlpha(this MonoBehaviour @object, float newAlpha) {
+        foreach (var renderer in @object.GetComponentsInChildren<Renderer>( )) {
+            var rendererColor = renderer.material.color;
+            rendererColor.a = newAlpha;
+            renderer.material.color = rendererColor;
+        }
+    }
 }

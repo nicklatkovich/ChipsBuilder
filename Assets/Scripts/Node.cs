@@ -9,7 +9,7 @@ public class Node : MonoBehaviour {
 
 	// Use this for initialization
 	void Start ( ) {
-		
+        Utils.ChangeColor(this, Color.gray);
 	}
 	
 	// Update is called once per frame
