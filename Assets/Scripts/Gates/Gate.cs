@@ -16,10 +16,15 @@ public abstract class Gate : MonoBehaviour {
     public List<Node> NodesOut = new List<Node>( );
 
     public Vector3[ ] GetNodesInPosition( ) {
-        return new Vector3[ ] {
-            transform.position + new Vector3(-2, 1, -1),
-            transform.position + new Vector3(-2, 1,  1)
-        };
+        uint nodesCount = GetNodesInCount( );
+        int x = -((int)GetWidth( ) - 1) / 2;
+        Vector3[ ] result = new Vector3[nodesCount];
+        for (int i = 0; i < nodesCount; i++) {
+            result[i] =
+                this.transform.position +
+                new Vector3(x, 1, (i % 2 == 0 ? -1 : 1) * (nodesCount % 2 == 0 ? i / 2 * 2 + 1 : (i + 1) / 2 * 2));
+        }
+        return result;
     }
 
     public static Controller Main {
@@ -30,9 +35,15 @@ public abstract class Gate : MonoBehaviour {
     }
 
     public Vector3[ ] GetNodesOutPosition( ) {
-        return new Vector3[ ] {
-            transform.position + new Vector3(2, 1, 0),
-        };
+        uint nodesCount = GetNodesOutCount( );
+        int x = ((int)GetWidth( ) - 1) / 2;
+        Vector3[ ] result = new Vector3[nodesCount];
+        for (int i = 0; i < nodesCount; i++) {
+            result[i] =
+                this.transform.position +
+                new Vector3(x, 1, (i % 2 == 0 ? -1 : 1) * nodesCount % 2 == 0 ? i / 2 * 2 + 1 : (i + 1) / 2 * 2);
+        }
+        return result;
     }
 
     private void createNodes(Vector3[ ] nodesPosition, bool isIn) {
