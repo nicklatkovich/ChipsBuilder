@@ -232,6 +232,8 @@ MonoBehaviour:
   realPlane: {fileID: 1146592307}
   andGatePrefab: {fileID: 114311671008247152, guid: 25aef392c03f4524db6087fb8b97bb95,
     type: 2}
+  orGatePrefab: {fileID: 114869034640492216, guid: c2edf57097b7afc4ba72e231599e504e,
+    type: 2}
   nodePrefab: {fileID: 114610255297320578, guid: 37917c6aef2f7264eba10ecfc791ecba,
     type: 2}
   netPrefab: {fileID: 114405984287949050, guid: efaaa9ec98df6874aa4909164549b774,

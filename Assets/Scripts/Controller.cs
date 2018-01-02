@@ -11,6 +11,7 @@ public class Controller : MonoBehaviour {
 
     public GameObject realPlane;
     public AndGate andGatePrefab;
+    public OrGate orGatePrefab;
     public Node nodePrefab;
     public Net netPrefab;
     public CanvasRenderer selectPanel;
@@ -73,24 +74,26 @@ public class Controller : MonoBehaviour {
                 //standingBlock.transform.localScale = new Vector3(0.025f, 0.025f, 0.025f);
                 standingBlock.ChangeAlpha(0.2f);
             }
-        }
-        else if (Input.GetKeyDown(KeyCode.Escape)) {
+        } else if (Input.GetKeyDown(KeyCode.O)) {
+            if (state == State.Camera) {
+                state = State.BlockStand;
+                standingBlock = Instantiate(orGatePrefab);
+                standingBlock.ChangeAlpha(0.2f);
+            }
+        } else if (Input.GetKeyDown(KeyCode.Escape)) {
             switch (state) {
-                case State.Net:
-                    {
+                case State.Net: {
                         standingNet.from.nets.Remove(standingNet);
                         Destroy(standingNet.gameObject);
                         standingNet = null;
                         break;
                     }
-                case State.BlockStand:
-                    {
+                case State.BlockStand: {
                         Destroy(standingBlock.gameObject);
                         standingBlock = null;
                         break;
                     }
-                case State.BlockSelect:
-                    {
+                case State.BlockSelect: {
                         selectedBlock = null;
                         selectPanel.transform.localScale = Vector3.zero;
                         break;
@@ -165,26 +168,22 @@ public class Controller : MonoBehaviour {
                             standingBlock.Place( );
                             standingBlock = null;
                         }
-                    }
-                    else if (Time.time - mLBPressedTime <= CLICK_TIME) {
+                    } else if (Time.time - mLBPressedTime <= CLICK_TIME) {
                         if (state == State.Camera) {
                             if (nodesMap[x][z] != null) {
                                 standingNet = Instantiate(netPrefab);
                                 state = State.Net;
                                 standingNet.from = nodesMap[x][z];
-                            }
-                            else if (gatesMap[x][z] != null) {
+                            } else if (gatesMap[x][z] != null) {
                                 state = State.BlockSelect;
                                 selectedBlock = gatesMap[x][z];
                                 selectPanel.transform.localScale = new Vector3(1, 1, 1);
                             }
-                        }
-                        else if (state == State.BlockSelect) {
+                        } else if (state == State.BlockSelect) {
                             selectedBlock = null;
                             state = State.Camera;
                             selectPanel.transform.localScale = Vector3.zero;
-                        }
-                        else if (state == State.Net) {
+                        } else if (state == State.Net) {
                             if (nodesMap[x][z] != null) {
                                 standingNet.to = nodesMap[x][z];
                                 standingNet.Done = true;
@@ -206,21 +205,18 @@ public class Controller : MonoBehaviour {
                 Vector3 mouse3DTranslation = ray.GetPoint(distance);
                 mouse3DTranslation.y = 0;
                 mainCam.transform.position -= (mouse3DTranslation - mousePos3d);
-            }
-            else if (state == State.BlockStand) {
+            } else if (state == State.BlockStand) {
                 if (canStandBlock) {
                     standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
                     standingBlock.ChangeColor("^BlockMaterial*", new Color(0f, 0f, 0.8f, 0.5f));
                     standingBlock.ChangeColor("^TextMaterial*", new Color(0.8f, 0f, 0f, 0.5f));
-                }
-                else {
+                } else {
                     standingBlock.transform.position = new Vector3(hitPoint.x, 0.6f, hitPoint.z);
                     standingBlock.ChangeColor("^BlockMaterial*", new Color(1f, 0f, 0f, 0.5f));
                     standingBlock.ChangeColor("^TextMaterial*", new Color(1f, 0f, 0f, 0.5f));
                     //standingBlock.ChangeColor("^NodeMaterial", new Color(1f, 0f, 0f, 0.5f));
                 }
-            }
-            else if (state == State.Net) {
+            } else if (state == State.Net) {
                 standingNet.abstractTo = hitPoint.ToVector2XZ( );
             }
             if (Input.GetMouseButton(1) && canRotate) {
@@ -258,7 +254,7 @@ public class Controller : MonoBehaviour {
                 otherNode.nets.Remove(net);
                 Destroy(net.gameObject);
             }
-            node.nets.Clear();
+            node.nets.Clear( );
         }
         Destroy(selectedBlock.gameObject);
     }
