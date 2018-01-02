@@ -12,7 +12,7 @@ public class AndGate : Gate {
     public override uint GetNodesOutCount( ) {
         return 1;
     }
-
+    
     #endregion
 
     // Use this for initialization

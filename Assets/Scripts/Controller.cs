@@ -208,12 +208,12 @@ public class Controller : MonoBehaviour {
             } else if (state == State.BlockStand) {
                 if (canStandBlock) {
                     standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
-                    standingBlock.ChangeColor("^BlockMaterial*", new Color(0f, 0f, 0.8f, 0.5f));
-                    standingBlock.ChangeColor("^TextMaterial*", new Color(0.8f, 0f, 0f, 0.5f));
+                    standingBlock.ChangeColor("GateMaterial", standingBlock.BlockColor);
+                    standingBlock.ChangeColor("GateTextMaterial", standingBlock.TextColor);
                 } else {
                     standingBlock.transform.position = new Vector3(hitPoint.x, 0.6f, hitPoint.z);
-                    standingBlock.ChangeColor("^BlockMaterial*", new Color(1f, 0f, 0f, 0.5f));
-                    standingBlock.ChangeColor("^TextMaterial*", new Color(1f, 0f, 0f, 0.5f));
+                    standingBlock.ChangeColor("GateMaterial", new Color(1f, 0f, 0f, 0.5f));
+                    standingBlock.ChangeColor("GateTextMaterial", new Color(1f, 0f, 0f, 0.5f));
                     //standingBlock.ChangeColor("^NodeMaterial", new Color(1f, 0f, 0f, 0.5f));
                 }
             } else if (state == State.Net) {

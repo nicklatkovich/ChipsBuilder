@@ -9,6 +9,9 @@ public abstract class Gate : MonoBehaviour {
     public abstract uint GetNodesInCount( );
     public abstract uint GetNodesOutCount( );
 
+    public Color BlockColor;
+    public Color TextColor;
+
     public List<Node> NodesIn = new List<Node>( );
     public List<Node> NodesOut = new List<Node>( );
 
