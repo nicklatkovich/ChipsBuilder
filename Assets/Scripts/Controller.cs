@@ -12,6 +12,7 @@ public class Controller : MonoBehaviour {
     public GameObject realPlane;
     public AndGate andGatePrefab;
     public OrGate orGatePrefab;
+    public InitGate initGatePrefab;
     public Node nodePrefab;
     public Net netPrefab;
     public CanvasRenderer selectPanel;
@@ -66,20 +67,22 @@ public class Controller : MonoBehaviour {
         collisionMap = Utils.Init2DArray(mapWidth, mapHeight, false);
     }
 
+    void InitGate(Gate gatePrefab) {
+        if (state == State.Camera) {
+            state = State.BlockStand;
+            standingBlock = Instantiate(gatePrefab);
+            //standingBlock.transform.localScale = new Vector3(0.025f, 0.025f, 0.025f);
+            standingBlock.ChangeAlpha(0.2f);
+        }
+    }
+
     void Update( ) {
         if (Input.GetKeyDown(KeyCode.A)) {
-            if (state == State.Camera) {
-                state = State.BlockStand;
-                standingBlock = Instantiate(andGatePrefab);
-                //standingBlock.transform.localScale = new Vector3(0.025f, 0.025f, 0.025f);
-                standingBlock.ChangeAlpha(0.2f);
-            }
+            InitGate(andGatePrefab);
         } else if (Input.GetKeyDown(KeyCode.O)) {
-            if (state == State.Camera) {
-                state = State.BlockStand;
-                standingBlock = Instantiate(orGatePrefab);
-                standingBlock.ChangeAlpha(0.2f);
-            }
+            InitGate(orGatePrefab);
+        } else if (Input.GetKeyDown(KeyCode.I)) {
+            InitGate(initGatePrefab);
         } else if (Input.GetKeyDown(KeyCode.Escape)) {
             switch (state) {
                 case State.Net: {

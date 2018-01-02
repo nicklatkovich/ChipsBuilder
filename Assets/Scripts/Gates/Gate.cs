@@ -17,7 +17,7 @@ public abstract class Gate : MonoBehaviour {
 
     public Vector3[ ] GetNodesInPosition( ) {
         uint nodesCount = GetNodesInCount( );
-        int x = -((int)GetWidth( ) - 1) / 2;
+        float x = GetWidth( ) / -2f;
         Vector3[ ] result = new Vector3[nodesCount];
         for (int i = 0; i < nodesCount; i++) {
             result[i] =
@@ -36,7 +36,7 @@ public abstract class Gate : MonoBehaviour {
 
     public Vector3[ ] GetNodesOutPosition( ) {
         uint nodesCount = GetNodesOutCount( );
-        int x = ((int)GetWidth( ) - 1) / 2;
+        float x = GetWidth( ) / 2f;
         Vector3[ ] result = new Vector3[nodesCount];
         for (int i = 0; i < nodesCount; i++) {
             result[i] =
