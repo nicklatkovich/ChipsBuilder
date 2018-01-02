@@ -230,7 +230,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   realPlane: {fileID: 1146592307}
-  andGatePrefab: {fileID: 114362295226579624, guid: 25aef392c03f4524db6087fb8b97bb95,
+  andGatePrefab: {fileID: 114311671008247152, guid: 25aef392c03f4524db6087fb8b97bb95,
     type: 2}
   nodePrefab: {fileID: 114610255297320578, guid: 37917c6aef2f7264eba10ecfc791ecba,
     type: 2}
