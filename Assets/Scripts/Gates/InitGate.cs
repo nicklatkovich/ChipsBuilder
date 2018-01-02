@@ -17,14 +17,20 @@ public class InitGate : Gate {
 
     public bool State = false;
 
+    private Transform One;
+    private Transform Zero;
+
     // Use this for initialization
     void Start( ) {
         base.Start( );
+        One = transform.Find("InitGate").Find("Text1");
+        Zero = transform.Find("InitGate").Find("Text0");
     }
 
     // Update is called once per frame
     void Update( ) {
-
+        One.gameObject.SetActive(State);
+        Zero.gameObject.SetActive(!State);
     }
 
     protected override bool[ ] Work(bool[ ] inputs) {

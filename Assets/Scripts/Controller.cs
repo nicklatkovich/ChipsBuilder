@@ -67,7 +67,7 @@ public class Controller : MonoBehaviour {
         collisionMap = Utils.Init2DArray(mapWidth, mapHeight, false);
     }
 
-    void InitGate(Gate gatePrefab) {
+    void CreateGate(Gate gatePrefab) {
         if (state == State.Camera) {
             state = State.BlockStand;
             standingBlock = Instantiate(gatePrefab);
@@ -78,11 +78,11 @@ public class Controller : MonoBehaviour {
 
     void Update( ) {
         if (Input.GetKeyDown(KeyCode.A)) {
-            InitGate(andGatePrefab);
+            CreateGate(andGatePrefab);
         } else if (Input.GetKeyDown(KeyCode.O)) {
-            InitGate(orGatePrefab);
+            CreateGate(orGatePrefab);
         } else if (Input.GetKeyDown(KeyCode.I)) {
-            InitGate(initGatePrefab);
+            CreateGate(initGatePrefab);
         } else if (Input.GetKeyDown(KeyCode.Escape)) {
             switch (state) {
                 case State.Net: {
@@ -260,5 +260,12 @@ public class Controller : MonoBehaviour {
             node.nets.Clear( );
         }
         Destroy(selectedBlock.gameObject);
+    }
+
+    public void OnChangeInitGate( ) {
+        if (selectedBlock == null) return;
+        InitGate g;
+        if ((g = selectedBlock.GetComponent<InitGate>( )) == null) return;
+        g.State = !g.State;
     }
 }
