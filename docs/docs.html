@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>ChipsBuilder</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="headerTitle">ChipsBuilder</div>
+        <div class="headerMenu">
+            <a href="index.html">
+                <div>Главная</div>
+            </a>
+            <div class="current">Булева алгебра</div>
+            <a href="">
+                <div>Описание программы</div>
+            </a>
+            <a href="">
+                <div>Demo</div>
+            </a>
+        </div>
+    </div>
+    <div class="titleBlock">
+        Булева <span>алгебра</span>
+    </div>
+    <section class="light last">
+        <h1>Определение</h1>
+        <div>
+            Булева алгебра — непустое множество A с двумя бинарными операциями + (аналог конъюнкции), • (аналог дизъюнкции), одной унарной
+            операцией ~ (аналог отрицания) и двумя выделенными элементами: 0 и 1 такими, что для всех a, b и c из множества
+            A верны следующие аксиомы:
+        </div>
+        <div class="center">
+            <table>
+                <tr>
+                    <td class="code">
+                        a + (b+c) = (a+b) + c
+                    </td>
+                    <td class="code">
+                        a (bc) = (ab) c
+                    </td>
+                    <td>
+                        Ассоциативность
+                    </td>
+                </tr>
+                <tr>
+                    <td class="code">
+                        a+b = b+a
+                    </td>
+                    <td class="code">
+                        ab = ba
+                    </td>
+                    <td>
+                        Коммутативность
+                    </td>
+                </tr>
+                <tr>
+                    <td class="code">
+                        a + ab = a
+                    </td>
+                    <td class="code">
+                        a (a+b) = a
+                    </td>
+                    <td>
+                        Закон поглащения
+                    </td>
+                </tr>
+                <tr>
+                    <td class="code">
+                        a + bc = (a+b) (a+c)
+                    </td>
+                    <td class="code">
+                        a (b+c) = ab + ac
+                    </td>
+                    <td>
+                        Дистрибутивность
+                    </td>
+                </tr>
+                <tr>
+                    <td class="code">
+                        a + ~a = 1
+                    </td>
+                    <td class="code">
+                        a • ~a = 0
+                    </td>
+                    <td>
+                        Дополнительность
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            Первые три аксиомы означают, что (A, •, +) является решёткой. Таким образом, булева алгебра может быть определена как дистрибутивная
+            решётка, в которой выполнены две последние аксиомы.
+        </div>
+        <h1>
+            Некоторые свойства
+        </h1>
+        <div class="center">
+            <table>
+                <tr>
+                    <td>
+                        a+a = a
+                    </td>
+                    <td>
+                        a•a = a
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        a+0 = a
+                    </td>
+                    <td>
+                        a•0 = a
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        a+1 = 1
+                    </td>
+                    <td>
+                        a•0 = 0
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        ~0 = 1
+                    </td>
+                    <td>
+                        ~1 = 0
+                    </td>
+                    <td>Дополнение нуля — единица и наоборот</td>
+                </tr>
+                <tr>
+                    <td>
+                        ~(a+b) = ~a • ~b
+                    </td>
+                    <td>
+                        ~(a•b) = ~a + ~b
+                    </td>
+                    <td>Законы де Моргана</td>
+                </tr>
+                <tr>
+                    <td>
+                        ~~a = a
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                        Инволютивность отрицания
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </section>
+</body>
