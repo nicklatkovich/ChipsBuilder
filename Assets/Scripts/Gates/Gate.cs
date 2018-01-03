@@ -60,6 +60,24 @@ public abstract class Gate : MonoBehaviour {
         createNodes(GetNodesOutPosition( ), false);
     }
 
+    public bool DoWort( ) {
+        bool result = false;
+        Node[ ] nodes = NodesIn.ToArray( );
+        bool[ ] inputs = new bool[nodes.Length];
+        for (int i = 0; i < nodes.Length; i++) {
+            inputs[i] = nodes[i].State;
+        }
+        bool[ ] outputs = Work(inputs);
+        Node[ ] nodesOut = NodesOut.ToArray( );
+        for (int i = 0; i < nodesOut.Length; i++) {
+            if (nodesOut[i].State != outputs[i]) {
+                result = true;
+                nodesOut[i].State = outputs[i];
+            }
+        }
+        return result;
+    }
+
     protected abstract bool[ ] Work(bool[ ] inputs);
 
     private void placeNodes(ICollection<Node> nodes) {

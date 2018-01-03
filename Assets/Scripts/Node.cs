@@ -7,6 +7,7 @@ public class Node : MonoBehaviour {
 	public bool isIn;
 	public Gate gate;
     public HashSet<Net> nets = new HashSet<Net>();
+    public bool State = false;
 
 	// Use this for initialization
 	void Start ( ) {

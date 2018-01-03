@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class Controller : MonoBehaviour {
@@ -46,6 +47,7 @@ public class Controller : MonoBehaviour {
     Gate[ ][ ] gatesMap;
     bool[ ][ ] collisionMap;
     bool mousePing = false;
+    Queue<Node> qNodes = new Queue<Node>( );
 
     public const float CLICK_TIME = 0.5f;
 
@@ -208,7 +210,7 @@ public class Controller : MonoBehaviour {
                             state = State.Camera;
                             selectPanel.transform.localScale = Vector3.zero;
                         } else if (state == State.Net) {
-                            if (nodesMap[x][z] != null) {
+                            if (nodesMap[x][z] != null && standingNet.from != nodesMap[x][z]) {
                                 standingNet.to = nodesMap[x][z];
                                 standingNet.Done = true;
                                 standingNet = null;
@@ -257,6 +259,31 @@ public class Controller : MonoBehaviour {
             }
         }
         prevMousePos = mousePos;
+        Work( );
+    }
+
+    public void Work( ) {
+        Queue<Node> newQNode = new Queue<Node>( );
+        HashSet<Gate> activatedGates = new HashSet<Gate>( );
+        foreach (Node node in qNodes) {
+            if (node.isIn) {
+                activatedGates.Add(node.gate);
+            }
+            else {
+                foreach (Net net in node.nets) {
+                    Node newNode = net.from == node ? net.to : net.from;
+                    newQNode.Enqueue(newNode);
+                    newNode.State = node.State;
+                }
+            }
+        }
+        foreach (Gate gate in activatedGates) {
+            if (gate.DoWort( )) {
+                Node node = gate.NodesOut[0];
+                newQNode.Enqueue(node);
+            }
+        }
+        qNodes = newQNode;
     }
 
     public void RemoveSelectedBlock( ) {
@@ -287,6 +314,7 @@ public class Controller : MonoBehaviour {
         if (selectedBlock == null) return;
         InitGate g;
         if ((g = selectedBlock.GetComponent<InitGate>( )) == null) return;
-        g.State = !g.State;
+        g.NodesOut[0].State = g.State = !g.State;
+        qNodes.Enqueue(g.NodesOut[0]);
     }
 }

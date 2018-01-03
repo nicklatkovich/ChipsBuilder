@@ -33,5 +33,6 @@ public class Net : MonoBehaviour {
         transform.localScale = new Vector3((f - t).magnitude, 1, 1);
         transform.position = ((f + t) / 2f).ToVector3XZ(1f);
         transform.localRotation = Quaternion.Euler(0, -(t - f).GetAtan2Deg( ), 0);
+        Utils.ChangeColor(this, from.State && to.State ? Color.green : Color.gray);
     }
 }
