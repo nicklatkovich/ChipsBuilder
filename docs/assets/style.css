@@ -241,7 +241,7 @@ table td + td {
 	cursor:pointer;
 }
 
-.dialog .header{
+.dialog .header1{
 	text-align:center;
 	margin-top:-200px;
 }
@@ -255,7 +255,6 @@ table td + td {
 }
 
 .dialog .history{
-	margin-top: -192px;
 	height: 300px;
 	overflow-x:hidden;
 	overflow-y:scroll;

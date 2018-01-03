@@ -4,7 +4,7 @@ function prepare_environment(){
 //диалоговый модуль
 	document.body.innerHTML+="<div id='dialog' class='dialog' style='margin-left:-25px;'>"+
 		"<div class='label' onclick='toggleDialog()'>Нажми, чтобы спросить!</div>"+
-		"<div class='header'>История:</div>"+
+		"<div class='header1'>История:</div>"+
 		"<div class='history' id='history'></div>"+
 		"<div class='question'><input id='Qdialog' placeholder='Введите вопрос'/><br>"+
 			"<button onclick='ask(\"Qdialog\")'>Спросить</button>"
