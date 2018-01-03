@@ -10,6 +10,13 @@ public class Controller : MonoBehaviour {
         get { return _current; }
     }
 
+    enum State {
+        Camera,
+        BlockStand,
+        BlockSelect,
+        Net,
+    }
+
     public GameObject realPlane;
     public AndGate andGatePrefab;
     public OrGate orGatePrefab;
@@ -18,13 +25,6 @@ public class Controller : MonoBehaviour {
     public Node nodePrefab;
     public Net netPrefab;
     public CanvasRenderer selectPanel;
-
-    enum State {
-        Camera,
-        BlockStand,
-        BlockSelect,
-        Net,
-    }
 
     State state = State.Camera;
     uint mapWidth = 50;

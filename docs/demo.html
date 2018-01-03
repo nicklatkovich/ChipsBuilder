@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>ChipsBuilder</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | ChipsBuilder</title>
+    <link rel="shortcut icon" href="assets/build/TemplateData/favicon.ico">
+    <link rel="stylesheet" href="assets/build/TemplateData/style.css">
+    <script src="assets/build/TemplateData/UnityProgress.js"></script>
+    <script src="assets/build/Build/UnityLoader.js"></script>
+    <script>
+        var gameInstance = UnityLoader.instantiate("gameContainer", "assets/build/Build/build.json", { onProgress: UnityProgress });
+    </script>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="headerTitle">ChipsBuilder</div>
+        <div class="headerMenu">
+            <a href="index.html">
+                <div>Главная</div>
+            </a>
+            <a href="docs.html">
+                <div>Булева алгебра</div>
+            </a>
+            <a href="">
+                <div>Описание программы</div>
+            </a>
+            <div class="current">Demo</div>
+        </div>
+    </div>
+    <div class="titleBlock last">
+        <div class="webgl-content">
+            <div id="gameContainer" style="width: 1024px; height: 512px"></div>
+            <div class="footer">
+                <div class="webgl-logo"></div>
+                <div class="fullscreen" onclick="gameInstance.SetFullscreen(1)"></div>
+                <div class="title">ChipsBuilder</div>
+            </div>
+        </div>
+    </div>
+</body>
