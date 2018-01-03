@@ -45,6 +45,7 @@ public class Controller : MonoBehaviour {
     public Node[ ][ ] nodesMap;
     Gate[ ][ ] gatesMap;
     bool[ ][ ] collisionMap;
+    bool mousePing = false;
 
     public const float CLICK_TIME = 0.5f;
 
@@ -67,13 +68,28 @@ public class Controller : MonoBehaviour {
         collisionMap = Utils.Init2DArray(mapWidth, mapHeight, false);
     }
 
-    void CreateGate(Gate gatePrefab) {
+    public void CreateGate(Gate gatePrefab) {
         if (state == State.Camera) {
             state = State.BlockStand;
             standingBlock = Instantiate(gatePrefab);
             //standingBlock.transform.localScale = new Vector3(0.025f, 0.025f, 0.025f);
             standingBlock.ChangeAlpha(0.2f);
         }
+    }
+
+    public void CreateAndGate( ) {
+        CreateGate(andGatePrefab);
+        mousePing = true;
+    }
+
+    public void CreateOrGate( ) {
+        CreateGate(orGatePrefab);
+        mousePing = true;
+    }
+
+    public void CreateInitGate( ) {
+        CreateGate(initGatePrefab);
+        mousePing = true;
     }
 
     void Update( ) {
@@ -155,21 +171,26 @@ public class Controller : MonoBehaviour {
                 }
                 if (Input.GetMouseButtonUp(0)) {
                     if (state == State.BlockStand) {
-                        if (canStandBlock) {
-                            state = State.Camera;
-                            standingBlock.ChangeAlpha(1f);
-                            for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
-                                for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
-                                    gatesMap[i][j] = standingBlock;
-                                    collisionMap[i][j] = true;
+                        if (!mousePing) {
+                            if (canStandBlock) {
+                                state = State.Camera;
+                                standingBlock.ChangeAlpha(1f);
+                                for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
+                                    for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
+                                        gatesMap[i][j] = standingBlock;
+                                        collisionMap[i][j] = true;
+                                    }
+                                    //collisionMap[i][z - 3] = collisionMap[i][z + 3] = true;
                                 }
-                                //collisionMap[i][z - 3] = collisionMap[i][z + 3] = true;
+                                //for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
+                                //    collisionMap[x - 3][j] = collisionMap[x + 3][j] = true;
+                                //}
+                                standingBlock.Place( );
+                                standingBlock = null;
                             }
-                            //for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
-                            //    collisionMap[x - 3][j] = collisionMap[x + 3][j] = true;
-                            //}
-                            standingBlock.Place( );
-                            standingBlock = null;
+                        }
+                        else {
+                            mousePing = false;
                         }
                     } else if (Time.time - mLBPressedTime <= CLICK_TIME) {
                         if (state == State.Camera) {
