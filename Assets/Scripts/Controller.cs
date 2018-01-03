@@ -14,6 +14,7 @@ public class Controller : MonoBehaviour {
     public AndGate andGatePrefab;
     public OrGate orGatePrefab;
     public InitGate initGatePrefab;
+    public LightGate lightGatePrefab;
     public Node nodePrefab;
     public Net netPrefab;
     public CanvasRenderer selectPanel;
@@ -97,11 +98,17 @@ public class Controller : MonoBehaviour {
     void Update( ) {
         if (Input.GetKeyDown(KeyCode.A)) {
             CreateGate(andGatePrefab);
-        } else if (Input.GetKeyDown(KeyCode.O)) {
+        }
+        else if (Input.GetKeyDown(KeyCode.O)) {
             CreateGate(orGatePrefab);
-        } else if (Input.GetKeyDown(KeyCode.I)) {
+        }
+        else if (Input.GetKeyDown(KeyCode.I)) {
             CreateGate(initGatePrefab);
-        } else if (Input.GetKeyDown(KeyCode.Escape)) {
+        }
+        else if (Input.GetKeyDown(KeyCode.L)) {
+            CreateGate(lightGatePrefab);
+        }
+        else if (Input.GetKeyDown(KeyCode.Escape)) {
             switch (state) {
                 case State.Net: {
                         standingNet.from.nets.Remove(standingNet);

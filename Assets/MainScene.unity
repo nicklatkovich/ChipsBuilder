@@ -777,6 +777,8 @@ MonoBehaviour:
     type: 2}
   initGatePrefab: {fileID: 114302219703887240, guid: 7724f9e7abd69bd499068e1675931953,
     type: 2}
+  lightGatePrefab: {fileID: 114494138959562302, guid: 2cf693ac6c4de34468d634bc93222c7c,
+    type: 2}
   nodePrefab: {fileID: 114610255297320578, guid: 37917c6aef2f7264eba10ecfc791ecba,
     type: 2}
   netPrefab: {fileID: 114405984287949050, guid: efaaa9ec98df6874aa4909164549b774,
