@@ -41,6 +41,7 @@ public class Controller : MonoBehaviour {
     Vector3 lastHitPoint = Vector3.zero;
     Node previousUnderNode = null;
     float mLBPressedTime = 0f;
+    float mRBPressedTime = 0f;
 
     Gate standingBlock;
     Net standingNet;
@@ -284,14 +285,6 @@ public class Controller : MonoBehaviour {
                                 state = State.Net;
                                 standingNet.from = nodesMap[x][z];
                             }
-                            else if (gatesMap[x][z] != null) {
-                                state = State.BlockSelect;
-                                selectedBlock = gatesMap[x][z];
-                                selectPanel.transform.localScale = new Vector3(
-                                    1,
-                                    1,
-                                    1);
-                            }
                         }
                         else if (state == State.BlockSelect) {
                             selectedBlock = null;
@@ -299,20 +292,41 @@ public class Controller : MonoBehaviour {
                             selectPanel.transform.localScale = Vector3.zero;
                         }
                         else if (state == State.Net) {
-                            if (nodesMap[x][z] != null && standingNet.from != nodesMap[x][z]) {
+                            bool newNode = false;
+                            if (nodesMap[x][z] == null) {
+                                Node node = Instantiate(nodePrefab);
+                                node.transform.position = new Vector3(x + 0.5f, 1.2f, z + 0.5f);
+                                nodesMap[x][z] = node;
+                                newNode = true;
+                            }
+                            if (standingNet.from != nodesMap[x][z]) {
                                 standingNet.to = nodesMap[x][z];
                                 standingNet.Done = true;
-                                standingNet = null;
-                                state = State.Camera;
+                                if (newNode) {
+                                    standingNet = Instantiate(netPrefab);
+                                    standingNet.from = nodesMap[x][z];
+                                }
+                                else {
+                                    standingNet = null;
+                                    state = State.Camera;
+                                }
                             }
                         }
                     }
                 }
                 if (Input.GetMouseButtonDown(1)) {
+                    mLBPressedTime = Time.time;
                     canRotate = true;
                     lastHitPoint = hitPoint;
                 }
                 if (Input.GetMouseButtonUp(1)) {
+                    if (Time.time - mLBPressedTime <= CLICK_TIME) {
+                        if (gatesMap[x][z] != null) {
+                            state = State.BlockSelect;
+                            selectedBlock = gatesMap[x][z];
+                            selectPanel.transform.localScale = new Vector3(1, 1, 1);
+                        }
+                    }
                     canRotate = false;
                 }
             }
@@ -357,7 +371,8 @@ public class Controller : MonoBehaviour {
                 }
             }
             else if (state == State.Net) {
-                standingNet.abstractTo = hitPoint.ToVector2XZ( );
+                // standingNet.abstractTo = hitPoint.ToVector2XZ( );
+                standingNet.abstractTo = new Vector2(x + 0.5f, z + 0.5f);// hitPoint.ToVector2XZ( );
             }
             else if (state == State.NodeStanding) {
                 standingNode.transform.position = new Vector3(x + 0.5f, 1.2f, z + 0.5f);
