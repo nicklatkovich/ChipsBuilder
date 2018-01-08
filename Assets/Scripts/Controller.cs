@@ -21,6 +21,7 @@ public class Controller : MonoBehaviour {
     public AndGate andGatePrefab;
     public OrGate orGatePrefab;
     public InitGate initGatePrefab;
+    public Inverter inverterPrefab;
     public LightGate lightGatePrefab;
     public Node nodePrefab;
     public Net netPrefab;
@@ -95,6 +96,11 @@ public class Controller : MonoBehaviour {
         mousePing = true;
     }
 
+    public void CreateInvertor( ) {
+        CreateGate(inverterPrefab);
+        mousePing = true;
+    }
+
     void Update( ) {
         if (Input.GetKeyDown(KeyCode.A)) {
             CreateGate(andGatePrefab);
@@ -107,6 +113,9 @@ public class Controller : MonoBehaviour {
         }
         else if (Input.GetKeyDown(KeyCode.L)) {
             CreateGate(lightGatePrefab);
+        }
+        else if (Input.GetKeyDown(KeyCode.N)) {
+            CreateGate(inverterPrefab);
         }
         else if (Input.GetKeyDown(KeyCode.Escape)) {
             switch (state) {
