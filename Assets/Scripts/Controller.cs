@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class Controller : MonoBehaviour {
 
@@ -56,17 +57,29 @@ public class Controller : MonoBehaviour {
     void Start( ) {
         _current = this;
         mousePlane = new Plane(Vector3.up, Vector3.zero);
-        realPlane.transform.position = new Vector3(mapWidth / 2f, 0f, mapHeight / 2f);
-        realPlane.transform.localScale = new Vector3(mapWidth / 10f, 1f, mapHeight / 10f);
+        realPlane.transform.position = new Vector3(
+            mapWidth / 2f,
+            0f,
+            mapHeight / 2f);
+        realPlane.transform.localScale = new Vector3(
+            mapWidth / 10f,
+            1f,
+            mapHeight / 10f);
         Material realPlaneMaterial = realPlane.GetComponent<Renderer>( ).material;
         realPlaneMaterial.mainTextureScale = new Vector2(mapWidth, mapHeight);
         realPlaneMaterial.mainTextureOffset = new Vector2(0.5f, 0.5f);
         // TODO: create height-map for realPlane
         mainCam = Camera.main;
         float cameraDistance = Mathf.Max(mapWidth, mapHeight);
-        mainCam.transform.position = realPlane.transform.position - new Vector3(0, 0, cameraDistance);
+        mainCam.transform.position = realPlane.transform.position - new Vector3(
+            0,
+            0,
+            cameraDistance);
         mainCam.transform.rotation = Quaternion.identity;
-        mainCam.transform.RotateAround(realPlane.transform.position, Vector3.right, 80f);
+        mainCam.transform.RotateAround(
+            realPlane.transform.position,
+            Vector3.right,
+            80f);
         gatesMap = Utils.Init2DArray<Gate>(mapWidth, mapHeight, null);
         nodesMap = Utils.Init2DArray<Node>(mapWidth, mapHeight, null);
         collisionMap = Utils.Init2DArray(mapWidth, mapHeight, false);
@@ -119,18 +132,21 @@ public class Controller : MonoBehaviour {
         }
         else if (Input.GetKeyDown(KeyCode.Escape)) {
             switch (state) {
-                case State.Net: {
+                case State.Net:
+                    {
                         standingNet.from.nets.Remove(standingNet);
                         Destroy(standingNet.gameObject);
                         standingNet = null;
                         break;
                     }
-                case State.BlockStand: {
+                case State.BlockStand:
+                    {
                         Destroy(standingBlock.gameObject);
                         standingBlock = null;
                         break;
                     }
-                case State.BlockSelect: {
+                case State.BlockSelect:
+                    {
                         selectedBlock = null;
                         selectPanel.transform.localScale = Vector3.zero;
                         break;
@@ -166,12 +182,20 @@ public class Controller : MonoBehaviour {
                     }
                 }
                 if (state == State.BlockStand && (canStandBlock = mouseOverMap)) {
-                    for (uint i = (uint)x - 2, iTo = i + 5; i < iTo; i++) {
-                        for (uint j = (uint)z - 2, jTo = j + 5; j < jTo; j++) {
-                            if (collisionMap[i][j]) {
-                                canStandBlock = false;
-                                i = iTo - 1;
-                                break;
+                    if (x < standingBlock.GetWidth( ) / 2 || mapWidth <= x + standingBlock.GetWidth( ) / 2 ||
+                        z < standingBlock.GetHeight( ) / 2 || mapHeight <= z + standingBlock.GetHeight( ) / 2) {
+                        canStandBlock = false;
+                    }
+                    else {
+                        for (uint i = (uint)x - standingBlock.GetWidth( ) / 2, iTo = i + standingBlock.GetWidth( );
+                        i < iTo; i++) {
+                            for (uint j = (uint)z - standingBlock.GetWidth( ) / 2,
+                                jTo = j + standingBlock.GetWidth( ); j < jTo; j++) {
+                                if (collisionMap[i][j]) {
+                                    canStandBlock = false;
+                                    i = iTo - 1;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -210,22 +234,29 @@ public class Controller : MonoBehaviour {
                         else {
                             mousePing = false;
                         }
-                    } else if (Time.time - mLBPressedTime <= CLICK_TIME) {
+                    }
+                    else if (Time.time - mLBPressedTime <= CLICK_TIME) {
                         if (state == State.Camera) {
                             if (nodesMap[x][z] != null) {
                                 standingNet = Instantiate(netPrefab);
                                 state = State.Net;
                                 standingNet.from = nodesMap[x][z];
-                            } else if (gatesMap[x][z] != null) {
+                            }
+                            else if (gatesMap[x][z] != null) {
                                 state = State.BlockSelect;
                                 selectedBlock = gatesMap[x][z];
-                                selectPanel.transform.localScale = new Vector3(1, 1, 1);
+                                selectPanel.transform.localScale = new Vector3(
+                                    1,
+                                    1,
+                                    1);
                             }
-                        } else if (state == State.BlockSelect) {
+                        }
+                        else if (state == State.BlockSelect) {
                             selectedBlock = null;
                             state = State.Camera;
                             selectPanel.transform.localScale = Vector3.zero;
-                        } else if (state == State.Net) {
+                        }
+                        else if (state == State.Net) {
                             if (nodesMap[x][z] != null && standingNet.from != nodesMap[x][z]) {
                                 standingNet.to = nodesMap[x][z];
                                 standingNet.Done = true;
@@ -247,26 +278,58 @@ public class Controller : MonoBehaviour {
                 Vector3 mouse3DTranslation = ray.GetPoint(distance);
                 mouse3DTranslation.y = 0;
                 mainCam.transform.position -= (mouse3DTranslation - mousePos3d);
-            } else if (state == State.BlockStand) {
+            }
+            else if (state == State.BlockStand) {
                 if (canStandBlock) {
-                    standingBlock.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
-                    standingBlock.ChangeColor("GateMaterial", standingBlock.BlockColor);
-                    standingBlock.ChangeColor("GateTextMaterial", standingBlock.TextColor);
-                } else {
-                    standingBlock.transform.position = new Vector3(hitPoint.x, 0.6f, hitPoint.z);
-                    standingBlock.ChangeColor("GateMaterial", new Color(1f, 0f, 0f, 0.5f));
-                    standingBlock.ChangeColor("GateTextMaterial", new Color(1f, 0f, 0f, 0.5f));
+                    standingBlock.transform.position = new Vector3(
+                        x + 0.5f,
+                        0,
+                        z + 0.5f);
+                    standingBlock.ChangeColor(
+                        "GateMaterial",
+                        standingBlock.BlockColor);
+                    standingBlock.ChangeColor(
+                        "GateTextMaterial",
+                        standingBlock.TextColor);
+                }
+                else {
+                    standingBlock.transform.position = new Vector3(
+                        hitPoint.x,
+                        0.6f,
+                        hitPoint.z);
+                    standingBlock.ChangeColor(
+                        "GateMaterial",
+                        new Color(
+                            1f,
+                            0f,
+                            0f,
+                            0.5f));
+                    standingBlock.ChangeColor(
+                        "GateTextMaterial",
+                        new Color(
+                            1f,
+                            0f,
+                            0f,
+                            0.5f));
                     //standingBlock.ChangeColor("^NodeMaterial", new Color(1f, 0f, 0f, 0.5f));
                 }
-            } else if (state == State.Net) {
+            }
+            else if (state == State.Net) {
                 standingNet.abstractTo = hitPoint.ToVector2XZ( );
             }
             if (Input.GetMouseButton(1) && canRotate) {
-                mainCam.transform.RotateAround(lastHitPoint, Vector3.up, mousePos.x - prevMousePos.x);
+                mainCam.transform.RotateAround(
+                    lastHitPoint,
+                    Vector3.up,
+                    mousePos.x - prevMousePos.x);
                 Vector3 mainCamPositionBackup = mainCam.transform.position;
                 Quaternion mainCamRotationBackup = mainCam.transform.rotation;
-                mainCam.transform.RotateAround(lastHitPoint,
-                    Vector3.Cross(Vector3.up, mainCam.transform.rotation * Vector3.up), prevMousePos.y - mousePos.y);
+                mainCam.transform.RotateAround(
+                    lastHitPoint,
+                    Vector3.Cross(
+                        Vector3.up,
+                        mainCam.transform.rotation * Vector3.up),
+                    prevMousePos.y - mousePos.y);
                 if (mainCam.transform.rotation.eulerAngles.x < 30f || mainCam.transform.position.y < 3f) {
                     // TODO: bring camera close to the border
                     mainCam.transform.position = mainCamPositionBackup;
@@ -327,9 +390,11 @@ public class Controller : MonoBehaviour {
     }
 
     public void OnChangeInitGate( ) {
-        if (selectedBlock == null) return;
+        if (selectedBlock == null)
+            return;
         InitGate g;
-        if ((g = selectedBlock.GetComponent<InitGate>( )) == null) return;
+        if ((g = selectedBlock.GetComponent<InitGate>( )) == null)
+            return;
         g.NodesOut[0].State = g.State = !g.State;
         qNodes.Enqueue(g.NodesOut[0]);
     }
