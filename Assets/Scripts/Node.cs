@@ -9,6 +9,9 @@ public class Node : MonoBehaviour {
     public HashSet<Net> nets = new HashSet<Net>();
     public bool State = false;
 
+    internal int x = 0;
+    internal int y = 0;
+
     internal bool Done = true;
 	// Use this for initialization
 	void Start ( ) {

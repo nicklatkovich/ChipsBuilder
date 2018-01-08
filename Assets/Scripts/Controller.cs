@@ -17,6 +17,7 @@ public class Controller : MonoBehaviour {
         BlockSelect,
         Net,
         NodeStanding,
+        NodeSelect,
     }
 
     public GameObject realPlane;
@@ -48,6 +49,7 @@ public class Controller : MonoBehaviour {
     Node standingNode;
 
     Gate selectedBlock;
+    Node selectedNode;
 
     public Node[ ][ ] nodesMap;
     Gate[ ][ ] gatesMap;
@@ -168,6 +170,12 @@ public class Controller : MonoBehaviour {
                         selectPanel.transform.localScale = Vector3.zero;
                         break;
                     }
+                case State.NodeSelect:
+                    {
+                        selectedNode = null;
+                        selectPanel.transform.localScale = Vector3.zero;
+                        break;
+                    }
                 case State.NodeStanding:
                     {
                         Destroy(standingNode.gameObject);
@@ -272,11 +280,23 @@ public class Controller : MonoBehaviour {
                             if (canStandBlock) {
                                 state = State.Camera;
                                 standingNode.Done = true;
+                                standingNode.x = x;
+                                standingNode.y = z;
                                 collisionMap[x][z] = true;
                                 nodesMap[x][z] = standingNode;
                                 standingNode = null;
                             }
                         }
+                    }
+                    else if (state == State.BlockSelect) {
+                        selectedBlock = null;
+                        state = State.Camera;
+                        selectPanel.transform.localScale = Vector3.zero;
+                    }
+                    else if (state == State.NodeSelect) {
+                        selectedNode = null;
+                        state = State.Camera;
+                        selectPanel.transform.localScale = Vector3.zero;
                     }
                     else if (Time.time - mLBPressedTime <= CLICK_TIME) {
                         if (state == State.Camera) {
@@ -285,11 +305,6 @@ public class Controller : MonoBehaviour {
                                 state = State.Net;
                                 standingNet.from = nodesMap[x][z];
                             }
-                        }
-                        else if (state == State.BlockSelect) {
-                            selectedBlock = null;
-                            state = State.Camera;
-                            selectPanel.transform.localScale = Vector3.zero;
                         }
                         else if (state == State.Net) {
                             bool newNode = false;
@@ -315,15 +330,26 @@ public class Controller : MonoBehaviour {
                     }
                 }
                 if (Input.GetMouseButtonDown(1)) {
-                    mLBPressedTime = Time.time;
+                    mRBPressedTime = Time.time;
                     canRotate = true;
                     lastHitPoint = hitPoint;
                 }
                 if (Input.GetMouseButtonUp(1)) {
-                    if (Time.time - mLBPressedTime <= CLICK_TIME) {
-                        if (gatesMap[x][z] != null) {
+                    if (Time.time - mRBPressedTime <= CLICK_TIME) {
+                        if (state == State.Net) {
+                            standingNet.from.nets.Remove(standingNet);
+                            Destroy(standingNet.gameObject);
+                            standingNet = null;
+                            state = State.Camera;
+                        }
+                        else if (gatesMap[x][z] != null) {
                             state = State.BlockSelect;
                             selectedBlock = gatesMap[x][z];
+                            selectPanel.transform.localScale = new Vector3(1, 1, 1);
+                        }
+                        else if (nodesMap[x][z] != null) {
+                            state = State.NodeSelect;
+                            selectedNode = nodesMap[x][z];
                             selectPanel.transform.localScale = new Vector3(1, 1, 1);
                         }
                     }
@@ -429,28 +455,44 @@ public class Controller : MonoBehaviour {
     }
 
     public void RemoveSelectedBlock( ) {
-        if (selectedBlock == null) {
-            return;
-        }
-        int x = Mathf.RoundToInt(selectedBlock.transform.position.x - 0.5f);
-        int z = Mathf.RoundToInt(selectedBlock.transform.position.z - 0.5f);
-        for (uint i = (uint)x - selectedBlock.GetWidth( ) / 2, iTo = i + selectedBlock.GetWidth( ); i < iTo; i++) {
-            for (uint j = (uint)z - selectedBlock.GetHeight( ) / 2, jTo = j + selectedBlock.GetHeight( );
-                j < jTo; j++) {
-                gatesMap[i][j] = null;
-                collisionMap[i][j] = false;
-                nodesMap[i][j] = null;
+        if (state == State.BlockSelect) {
+            if (selectedBlock == null) {
+                return;
             }
+            int x = Mathf.RoundToInt(selectedBlock.transform.position.x - 0.5f);
+            int z = Mathf.RoundToInt(selectedBlock.transform.position.z - 0.5f);
+            for (uint i = (uint)x - selectedBlock.GetWidth( ) / 2, iTo = i + selectedBlock.GetWidth( ); i < iTo; i++) {
+                for (uint j = (uint)z - selectedBlock.GetHeight( ) / 2, jTo = j + selectedBlock.GetHeight( );
+                j < jTo; j++) {
+                    gatesMap[i][j] = null;
+                    collisionMap[i][j] = false;
+                    nodesMap[i][j] = null;
+                }
+            }
+            foreach (var node in Utils.Concat(selectedBlock.NodesIn, selectedBlock.NodesOut)) {
+                foreach (var net in node.nets) {
+                    Node otherNode = net.from == node ? net.to : net.from;
+                    otherNode.nets.Remove(net);
+                    Destroy(net.gameObject);
+                }
+                node.nets.Clear( );
+            }
+            Destroy(selectedBlock.gameObject);
         }
-        foreach (var node in Utils.Concat(selectedBlock.NodesIn, selectedBlock.NodesOut)) {
-            foreach (var net in node.nets) {
-                Node otherNode = net.from == node ? net.to : net.from;
-                otherNode.nets.Remove(net);
+        else if (state == State.NodeSelect) {
+            foreach (var net in selectedNode.nets) {
+                foreach (var node in new Node[] { net.from, net.to }) {
+                    if (node == selectedNode) continue;
+                    node.nets.Remove(net);
+                    qNodes.Enqueue(node);
+                }
                 Destroy(net.gameObject);
             }
-            node.nets.Clear( );
+            nodesMap[selectedNode.x][selectedNode.y] = null;
+            Destroy(selectedNode.gameObject);
+            state = State.Camera;
+            selectPanel.transform.localScale = Vector3.zero;
         }
-        Destroy(selectedBlock.gameObject);
     }
 
     public void OnChangeInitGate( ) {
