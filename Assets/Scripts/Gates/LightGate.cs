@@ -23,11 +23,13 @@ public class LightGate : Gate {
     void Start( ) {
         base.Start( );
         Light = transform.Find("Light").GetComponent<Light>( );
+        Light.enabled = false;
     }
 
     // Update is called once per frame
     void Update( ) {
         Light.enabled = NodesIn[0].State;
+        Utils.ChangeColor(this, NodesIn[0].State ? Color.green : Color.gray);
     }
 
     protected override bool[ ] Work(bool[ ] inputs) {

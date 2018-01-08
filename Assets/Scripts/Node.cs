@@ -9,6 +9,7 @@ public class Node : MonoBehaviour {
     public HashSet<Net> nets = new HashSet<Net>();
     public bool State = false;
 
+    internal bool Done = true;
 	// Use this for initialization
 	void Start ( ) {
         Utils.ChangeColor(this, Color.gray);
@@ -16,5 +17,6 @@ public class Node : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update ( ) {
+        Utils.ChangeColor(this, State ? Color.green : Color.gray);
 	}
 }

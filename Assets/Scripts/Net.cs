@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Net : MonoBehaviour {
 
+    public Controller Main {
+        get { return Controller.Current; }
+    }
+
     private Node _from;
     public Node from {
         get { return _from; }
@@ -21,7 +25,15 @@ public class Net : MonoBehaviour {
         }
     }
     public Vector2 abstractTo;
-    public bool Done = false;
+    private bool _done = false;
+    public bool Done {
+        get { return _done; }
+        set {
+            _done = value;
+            Main.qNodes.Enqueue(from);
+            Main.qNodes.Enqueue(to);
+        }
+    }
 
     void Start( ) {
 

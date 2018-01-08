@@ -89,5 +89,6 @@ public abstract class Gate : MonoBehaviour {
     public virtual void Place( ) {
         placeNodes(NodesIn);
         placeNodes(NodesOut);
+        DoWort( );
     }
 }
