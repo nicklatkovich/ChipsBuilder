@@ -106,6 +106,11 @@ public class Controller : MonoBehaviour {
         mousePing = true;
     }
 
+    public void CreateBulb( ) {
+        CreateGate(lightGatePrefab);
+        mousePing = true;
+    }
+
     public void CreateInitGate( ) {
         CreateGate(initGatePrefab);
         mousePing = true;
